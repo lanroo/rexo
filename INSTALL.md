@@ -23,6 +23,26 @@ All releases (with `checksums.txt`) live on the
 
 ## Windows
 
+### Recommended: Scoop (no security warnings)
+
+[Scoop](https://scoop.sh) is a package manager for Windows. Installing through it
+runs in your user space and **skips the SmartScreen / Defender warnings** you get
+from a raw `.exe`. If you don't have Scoop yet, in PowerShell:
+
+```powershell
+Set-ExecutionPolicy -ExecutionPolicy RemoteSigned -Scope CurrentUser
+Invoke-RestMethod get.scoop.sh | Invoke-Expression
+```
+
+Then install REXO from this repo's manifest:
+
+```powershell
+scoop install https://raw.githubusercontent.com/lanroo/rexo/main/scoop/rexo.json
+rexo doctor
+```
+
+Update later with `scoop update rexo`.
+
 ### By file (no command line)
 
 1. Download [rexo_windows_amd64.zip](https://github.com/lanroo/rexo/releases/latest/download/rexo_windows_amd64.zip).
