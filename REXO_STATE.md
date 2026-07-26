@@ -10,8 +10,10 @@
 - CLI status: `version`, `doctor`, and `init` implemented
 - Supported targets: Windows amd64, macOS amd64/arm64, Linux amd64/arm64
 - License decision: Apache-2.0
-- Public repository target: `github.com/lanroo/rexo`
-- Publication status: not published
+- Repository: `github.com/lanroo/rexo` (default branch `main`)
+- Publication status: published as a **private** repo on 2026-07-26; public visibility still pending owner decision
+- CI status: green on Windows, macOS, and Linux (test, vet, build, smoke)
+- Release status: `v0.0.1` published with binaries + checksums for all 5 targets
 - Name clearance: preliminary search only; formal legal review pending
 
 ## Next acceptance gate
