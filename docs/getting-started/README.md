@@ -15,10 +15,31 @@ There are two tracks below. Pick the one that matches you:
 
 ## Track A — Non-developers
 
-You do **not** need to know how to code. You only need to download one file and
-run three commands in a terminal.
+You do **not** need to know how to code.
 
-### 1. Download the program
+### Easiest: a package manager
+
+If you have (or don't mind installing) a package manager, this is the cleanest
+route — one command, and updates are handled for you:
+
+- **macOS / Linux** ([Homebrew](https://brew.sh)):
+
+  ```bash
+  brew install lanroo/tap/rexo
+  ```
+
+- **Windows** ([Scoop](https://scoop.sh)): installs in user space and avoids the
+  SmartScreen "unrecognized app" prompt.
+
+  ```powershell
+  scoop bucket add rexo https://github.com/lanroo/rexo
+  scoop install rexo
+  ```
+
+Then run `rexo doctor`. If you prefer to just download a file instead, keep
+reading.
+
+### Or: download the program
 
 1. Open the project's **Releases** page on GitHub.
 2. Under the latest release, download the archive that matches your computer:
@@ -67,7 +88,17 @@ Mac / Linux:
 
 - `doctor` checks that your machine is compatible and prints a green report.
 - `init my-first-project` creates a new folder called `my-first-project` with a
-  ready-to-use project structure inside.
+  ready-to-use project structure — including an example `workflow.json`.
+
+Then run your first workflow:
+
+```bash
+cd my-first-project
+rexo run workflow.json
+```
+
+It executes the example (build "hello world" → uppercase it to "HELLO WORLD"),
+writing outputs and a trace under `.rexo/runs/`.
 
 > **macOS security note**: the first time, macOS may say the app is from an
 > unidentified developer. Right-click `rexo` → **Open** → **Open**, or go to
@@ -116,10 +147,12 @@ on your `PATH`, then you can run `rexo` from anywhere.
 Running `rexo init <name>` scaffolds a portable project:
 
 - `rexo.project.json` — versioned project contract;
+- `workflow.json` — a runnable example workflow;
 - `AGENTS.md` — local instructions for coding agents;
 - `REXO_BOOTSTRAP.md` — stable activation sequence;
 - `REXO_STATE.md` — compact project state;
-- `.rexo/artifacts` — reusable outputs;
+- `.rexo/artifacts` — content-addressed outputs;
+- `.rexo/runs` — one folder per run (execution trace + event log);
 - `.rexo/memory` — curated project memory.
 
 `init` refuses to overwrite an existing path, so it is safe to run.
@@ -131,6 +164,8 @@ Running `rexo init <name>` scaffolds a portable project:
 | `rexo version` | Prints the version and your OS/CPU target. |
 | `rexo doctor` | Verifies basic machine compatibility. |
 | `rexo init <dir>` | Creates a new portable REXO project in `<dir>`. |
+| `rexo run <workflow.json>` | Executes a workflow; `--replay <run-id>` verifies determinism. |
 
-The AI runtime (workflows calling models/tools) is **not** implemented yet — this
-release is the foundation. See the [roadmap](../roadmap/core-v1.md).
+Workflows are currently **deterministic** — no LLM or provider selection yet.
+That comes in later phases; see the [roadmap](../roadmap/core-v1.md) and the
+[Phase 1 design](../roadmap/phase-1-walking-skeleton.md).

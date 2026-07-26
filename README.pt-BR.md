@@ -7,23 +7,37 @@ sistemas de IA reutilizáveis. Modelos, ferramentas, memória, workflows,
 orçamentos e critérios de qualidade são tratados como infraestrutura governada,
 e não escondidos dentro de prompts gigantes.
 
-> Estado atual: fundação pública (`v0.0.1`). O CLI já funciona; o runtime de IA
-> ainda não foi implementado.
+> Estado atual: Fase 1 (walking skeleton). O CLI já executa workflows
+> determinísticos de ponta a ponta (`rexo run`); seleção de provider/LLM ainda
+> não foi implementada.
 
 [English](README.md) ·
+[Instalação](INSTALL.md) ·
 [Constituição arquitetural](docs/architecture/constitution.md) ·
-[PDF histórico v2](docs/architecture/AIOS_Constituicao_Arquitetural_v2.0.pdf) ·
 [Roadmap Core v1](docs/roadmap/core-v1.md) ·
 [Primeiros passos](docs/getting-started/README.md)
+
+## Instalação
+
+| Plataforma | Comando |
+|---|---|
+| macOS / Linux | `brew install lanroo/tap/rexo` |
+| Windows | `scoop bucket add rexo https://github.com/lanroo/rexo` e depois `scoop install rexo` |
+| Qualquer (devs Go) | `go install github.com/lanroo/rexo/cmd/rexo@latest` |
+
+Veja o [INSTALL.md](INSTALL.md) para downloads manuais e solução de problemas.
 
 ## O que funciona agora
 
 - `rexo version`: mostra versão, sistema e arquitetura.
 - `rexo doctor`: verifica a compatibilidade básica do computador.
 - `rexo init <diretório>`: cria um projeto portátil com manifesto, memória em
-  camadas, orçamento, política de qualidade e bootstrap para agentes.
+  camadas, orçamento, política de qualidade e um workflow de exemplo executável.
+- `rexo run <workflow.json>`: executa um workflow determinístico de ponta a
+  ponta, gravando artefatos endereçados por conteúdo e um trace de execução;
+  `--replay` verifica se a execução é reproduzível.
 - A mesma base é testada em Windows, macOS e Linux.
-- Os releases serão executáveis únicos, sem exigir Python, Node, Docker ou uma
+- Os releases são executáveis únicos, sem exigir Python, Node, Docker ou uma
   conta de LLM.
 
 ## Por que ele é diferente
@@ -42,6 +56,8 @@ go test ./...
 go build -o rexo ./cmd/rexo
 ./rexo doctor
 ./rexo init meu-primeiro-projeto
+cd meu-primeiro-projeto
+./rexo run workflow.json
 ```
 
 No Windows, o executável gerado será `rexo.exe`.
@@ -61,10 +77,10 @@ No Windows, o executável gerado será `rexo.exe`.
 
 ## O que ainda não existe
 
-Kernel de execução, providers de LLM, MCP, Economy Engine completo, memória
+Providers de LLM e seleção de provider, MCP, Economy Engine completo, memória
 semântica, Education Pack, marketplace, SDKs, Studio, Canvas e Creator fazem
-parte das fases seguintes. O repositório não fingirá que uma ideia no roadmap já
-é funcional.
+parte das fases seguintes. O kernel atual é **determinístico** (sem IA/rede). O
+repositório não fingirá que uma ideia no roadmap já é funcional.
 
 ## Licença e nome
 

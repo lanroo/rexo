@@ -6,8 +6,9 @@ REXO is an experimental, capability-first runtime for building reusable AI
 systems. It treats models, tools, memory, workflows, budgets, and quality gates
 as governed infrastructure instead of hiding them inside large prompts.
 
-> Project status: public foundation (`v0.0.1`). The CLI is functional; the AI
-> runtime is not implemented yet.
+> Project status: Phase 1 walking skeleton. The CLI runs deterministic
+> workflows end to end (`rexo run`); LLM/provider selection is not implemented
+> yet.
 
 [Português do Brasil](README.pt-BR.md) ·
 [Install](INSTALL.md) ·
@@ -20,7 +21,11 @@ as governed infrastructure instead of hiding them inside large prompts.
 - `rexo version` reports the build and target platform.
 - `rexo doctor` verifies basic machine compatibility.
 - `rexo init <directory>` creates a portable project with a manifest,
-  layered-memory structure, budget, quality policy, and agent bootstrap.
+  layered-memory structure, budget, quality policy, and a runnable example
+  workflow.
+- `rexo run <workflow.json>` executes a deterministic workflow end to end,
+  storing content-addressed artifacts and an execution trace; `--replay`
+  verifies the run is reproducible.
 - CI validates the same source on Windows, macOS, and Linux.
 - Releases are designed as standalone binaries with no required Python, Node,
   Docker, or LLM account.
