@@ -3,7 +3,8 @@
 - Product name: REXO
 - Expansion: Runtime for Execution & eXchange Orchestration
 - Naming history: AIOS (codename) → AIOREN → REXO; AIOS/AIOREN survive only in historical documents. See ADR 0004.
-- Current release target: v0.0.3
+- Current release target: v0.0.4
+- Install channels: Homebrew (`brew install lanroo/tap/rexo`, tap repo `lanroo/homebrew-tap`) and Scoop (`scoop bucket add rexo <repo>` + `scoop install rexo`, bucket in `bucket/`), both auto-published by goreleaser (brews + scoops) each release; also `go install`. Homebrew needs the `HOMEBREW_TAP_TOKEN` repo secret (maintainer-only, one-time).
 - Current phase: Phase 1 — Walking Skeleton (in progress)
 - Branch: `codex/foundation-v0.0.1`
 - Runtime status: deterministic walking skeleton implemented (`rexo run` executes a workflow DAG, stores content-addressed artifacts + execution trace + JSONL event log, and `--replay` verifies determinism). No LLM/network yet. See docs/roadmap/phase-1-walking-skeleton.md.
