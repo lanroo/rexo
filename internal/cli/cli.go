@@ -20,7 +20,7 @@ type BuildInfo struct {
 
 func Run(args []string, stdout, stderr io.Writer, build BuildInfo) int {
 	if len(args) == 0 {
-		printHelp(stdout)
+		printWelcome(stdout, build)
 		return 0
 	}
 
@@ -122,6 +122,35 @@ func runInit(args []string, stdout, stderr io.Writer) int {
 	fmt.Fprintf(stdout, "Created REXO project %q at %s\n", result.Name, result.Path)
 	fmt.Fprintf(stdout, "Next: cd %s\n", result.Path)
 	return 0
+}
+
+func printWelcome(w io.Writer, build BuildInfo) {
+	version := build.Version
+	if version == "" {
+		version = "dev"
+	}
+	fmt.Fprintf(w, `============================================================
+  REXO — Runtime for Execution & eXchange Orchestration
+  %s · public foundation
+============================================================
+
+REXO is a command-line tool, not an app with buttons. That is
+why double-clicking only flashed a black window — this is normal
+and safe, not a virus. You use REXO by typing a command below.
+
+Try one of these:
+
+  rexo doctor              Check that your machine is ready
+  rexo init my-project     Create a new REXO project
+  rexo version             Show version details
+  rexo help                Show the full command list
+
+On Windows, type it as:  .\rexo.exe doctor
+
+Docs & downloads: https://github.com/lanroo/rexo
+
+Note: this %s public foundation does not call an AI model yet.
+`, version, version)
 }
 
 func printHelp(w io.Writer) {

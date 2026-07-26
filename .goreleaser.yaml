@@ -27,6 +27,9 @@ builds:
 
 archives:
   - id: default
+    # Version-less names so /releases/latest/download/<asset> links stay stable
+    # across releases (e.g. rexo_windows_amd64.zip, rexo_linux_amd64.tar.gz).
+    name_template: "rexo_{{ .Os }}_{{ .Arch }}"
     formats:
       - tar.gz
     format_overrides:
@@ -50,4 +53,4 @@ changelog:
       - "^test:"
 
 release:
-  draft: true
+  draft: false
