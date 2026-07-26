@@ -23,25 +23,28 @@ All releases (with `checksums.txt`) live on the
 
 ## Windows
 
-### Recommended: Scoop (no security warnings)
+### Recommended: one-line install (no security warnings)
 
-[Scoop](https://scoop.sh) is a package manager for Windows. Installing through it
-runs in your user space and **skips the SmartScreen / Defender warnings** you get
-from a raw `.exe`. If you don't have Scoop yet, in PowerShell:
+Open **PowerShell** and paste this single line:
 
 ```powershell
-Set-ExecutionPolicy -ExecutionPolicy RemoteSigned -Scope CurrentUser
-Invoke-RestMethod get.scoop.sh | Invoke-Expression
+irm https://raw.githubusercontent.com/lanroo/rexo/main/install.ps1 | iex
 ```
 
-Then install REXO from this repo's manifest:
+That's it. The script installs [Scoop](https://scoop.sh) for you (user scope, no
+admin) if you don't have it, then installs REXO through it. Installing via Scoop
+avoids the SmartScreen "unrecognized app" prompt you get from a raw `.exe`.
+
+Then run:
 
 ```powershell
-scoop install https://raw.githubusercontent.com/lanroo/rexo/main/scoop/rexo.json
 rexo doctor
+rexo init my-first-project
 ```
 
 Update later with `scoop update rexo`.
+
+> Prefer to do it by hand? `scoop install https://raw.githubusercontent.com/lanroo/rexo/main/scoop/rexo.json`
 
 ### By file (no command line)
 
