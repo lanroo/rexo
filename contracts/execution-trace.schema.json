@@ -1,0 +1,76 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://schemas.rexo.dev/v0.1/execution-trace.schema.json",
+  "title": "REXO Execution Trace",
+  "description": "The durable record of one workflow run: what ran, in what order, with what result and provenance. Sufficient to diagnose an interruption and to replay.",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["schema_version", "run_id", "workflow", "status", "started_at", "tasks"],
+  "properties": {
+    "schema_version": {
+      "const": "0.1.0"
+    },
+    "run_id": {
+      "type": "string",
+      "pattern": "^[0-9A-Za-z_-]{8,64}$"
+    },
+    "workflow": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["id", "version"],
+      "properties": {
+        "id": { "type": "string", "pattern": "^[a-z][a-z0-9-]*$" },
+        "version": {
+          "type": "string",
+          "pattern": "^[0-9]+\\.[0-9]+\\.[0-9]+(?:-[0-9A-Za-z.-]+)?$"
+        }
+      }
+    },
+    "status": {
+      "type": "string",
+      "enum": ["running", "succeeded", "failed", "interrupted"]
+    },
+    "started_at": { "type": "string", "format": "date-time" },
+    "ended_at": { "type": "string", "format": "date-time" },
+    "tasks": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": ["task_id", "capability", "status", "attempts"],
+        "properties": {
+          "task_id": { "type": "string", "pattern": "^[a-z][a-z0-9-]*$" },
+          "capability": {
+            "type": "string",
+            "pattern": "^[a-z][a-z0-9]*(?:\\.[a-z][a-z0-9]*)+$"
+          },
+          "status": {
+            "type": "string",
+            "enum": ["pending", "running", "succeeded", "failed", "skipped", "interrupted"]
+          },
+          "attempts": { "type": "integer", "minimum": 0 },
+          "needs": {
+            "type": "array",
+            "items": { "type": "string", "pattern": "^[a-z][a-z0-9-]*$" },
+            "uniqueItems": true
+          },
+          "output_artifact": {
+            "type": ["string", "null"],
+            "pattern": "^[a-z][a-z0-9-]*$"
+          },
+          "inputs_fingerprint": {
+            "type": "string",
+            "pattern": "^sha256:[0-9a-f]{64}$"
+          },
+          "started_at": { "type": "string", "format": "date-time" },
+          "ended_at": { "type": "string", "format": "date-time" },
+          "error": { "type": "string" }
+        }
+      }
+    },
+    "event_log": {
+      "type": "string",
+      "description": "Path, relative to the run directory, of the append-only JSONL event log for this run."
+    }
+  }
+}

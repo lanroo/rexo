@@ -41,6 +41,11 @@
             },
             "uniqueItems": true
           },
+          "with": {
+            "type": "object",
+            "description": "Capability inputs. A value is either a literal, or a reference { \"from_task\": \"<step-id>\" } that injects the output of an upstream step listed in needs.",
+            "additionalProperties": true
+          },
           "max_attempts": {
             "type": "integer",
             "minimum": 1,

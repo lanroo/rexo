@@ -1,0 +1,19 @@
+{
+  "schema_version": "0.1.0",
+  "id": "hello",
+  "version": "0.1.0",
+  "steps": [
+    {
+      "id": "greeting",
+      "capability": "text.constant",
+      "needs": [],
+      "with": { "value": "hello world" }
+    },
+    {
+      "id": "shout",
+      "capability": "text.uppercase",
+      "needs": ["greeting"],
+      "with": { "text": { "from_task": "greeting" } }
+    }
+  ]
+}

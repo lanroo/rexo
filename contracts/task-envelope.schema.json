@@ -1,0 +1,55 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://schemas.rexo.dev/v0.1/task-envelope.schema.json",
+  "title": "REXO Task Envelope",
+  "description": "The minimal, self-contained unit of work handed to a provider. A worker receives exactly one envelope and returns one artifact.",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["schema_version", "run_id", "task_id", "capability", "inputs"],
+  "properties": {
+    "schema_version": {
+      "const": "0.1.0"
+    },
+    "run_id": {
+      "type": "string",
+      "pattern": "^[0-9A-Za-z_-]{8,64}$"
+    },
+    "task_id": {
+      "type": "string",
+      "pattern": "^[a-z][a-z0-9-]*$"
+    },
+    "capability": {
+      "type": "string",
+      "pattern": "^[a-z][a-z0-9]*(?:\\.[a-z][a-z0-9]*)+$"
+    },
+    "inputs": {
+      "type": "object",
+      "description": "Capability-specific inputs. Values are literals or artifact references resolved by the kernel before dispatch.",
+      "additionalProperties": true
+    },
+    "input_artifacts": {
+      "type": "array",
+      "description": "Artifact ids this task consumes, in the order the kernel resolved them from the workflow DAG.",
+      "items": {
+        "type": "string",
+        "pattern": "^[a-z][a-z0-9-]*$"
+      },
+      "uniqueItems": true
+    },
+    "budget": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["max_seconds"],
+      "properties": {
+        "max_tokens": { "type": "integer", "minimum": 0 },
+        "max_calls": { "type": "integer", "minimum": 0 },
+        "max_seconds": { "type": "integer", "minimum": 1 }
+      }
+    },
+    "attempt": {
+      "type": "integer",
+      "minimum": 1,
+      "default": 1
+    }
+  }
+}
