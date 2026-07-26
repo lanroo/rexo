@@ -11,10 +11,10 @@
 - Supported targets: Windows amd64, macOS amd64/arm64, Linux amd64/arm64
 - License decision: Apache-2.0
 - Repository: `github.com/lanroo/rexo` (default branch `main`)
-- Publication status: published as a **private** repo on 2026-07-26; public visibility still pending owner decision
+- Publication status: **public** on 2026-07-26 (started private the same day, then made public by owner)
 - CI status: green on Windows, macOS, and Linux (test, vet, build, smoke)
-- Release status: `v0.0.1` published with binaries + checksums for all 5 targets
-- Name clearance: preliminary search only; formal legal review pending
+- Release status: `v0.0.1` public with binaries + checksums for all 5 targets; anonymous download verified
+- Name clearance: NOT cleared. Preliminary search (2026-07-26) found "REXO" is commercially active in software/IT (REXO Solutions LLC, Rexoit, Rexo Group) and REX-based AI-agent names nearby; no exact REXO trademark confirmed, but USPTO/INPI not formally searched. Formal INPI (BR, classes 9/42) + USPTO search still required before any commercial/brand investment.
 
 ## Next acceptance gate
 

@@ -4,24 +4,20 @@ REXO is a single self-contained binary. No Python, Node, Docker, or LLM account
 is required to run it.
 
 Pick your operating system, then choose **by file** (download + click) or **by
-command line**.
+command line**. After any install, run `rexo doctor` to confirm it works.
 
-> **Note — the repository is currently private.** Anonymous download links
-> (`curl` / `Invoke-WebRequest` straight to a release asset) only work once the
-> repo is public. While it is private, use the **GitHub CLI (`gh`)** method,
-> which downloads using your logged-in account.
+## Downloads (latest release)
 
-Release assets for `v0.0.1`:
-
-| OS | CPU | Asset |
+| OS | CPU | Download |
 |---|---|---|
-| Windows | x86-64 | `rexo_0.0.1_windows_amd64.zip` |
-| macOS | Apple Silicon (M1–M4) | `rexo_0.0.1_darwin_arm64.tar.gz` |
-| macOS | Intel | `rexo_0.0.1_darwin_amd64.tar.gz` |
-| Linux | x86-64 | `rexo_0.0.1_linux_amd64.tar.gz` |
-| Linux | ARM64 | `rexo_0.0.1_linux_arm64.tar.gz` |
+| Windows | x86-64 | [rexo_windows_amd64.zip](https://github.com/lanroo/rexo/releases/latest/download/rexo_0.0.1_windows_amd64.zip) |
+| macOS | Apple Silicon (M1–M4) | [rexo_darwin_arm64.tar.gz](https://github.com/lanroo/rexo/releases/latest/download/rexo_0.0.1_darwin_arm64.tar.gz) |
+| macOS | Intel | [rexo_darwin_amd64.tar.gz](https://github.com/lanroo/rexo/releases/latest/download/rexo_0.0.1_darwin_amd64.tar.gz) |
+| Linux | x86-64 | [rexo_linux_amd64.tar.gz](https://github.com/lanroo/rexo/releases/latest/download/rexo_0.0.1_linux_amd64.tar.gz) |
+| Linux | ARM64 | [rexo_linux_arm64.tar.gz](https://github.com/lanroo/rexo/releases/latest/download/rexo_0.0.1_linux_arm64.tar.gz) |
 
-Verify a check with `rexo doctor` after any install.
+All releases (with `checksums.txt`) live on the
+[Releases page](https://github.com/lanroo/rexo/releases).
 
 ---
 
@@ -29,8 +25,7 @@ Verify a check with `rexo doctor` after any install.
 
 ### By file (no command line)
 
-1. Go to the [Releases page](https://github.com/lanroo/rexo/releases) and
-   download `rexo_0.0.1_windows_amd64.zip`.
+1. Download [rexo_windows_amd64.zip](https://github.com/lanroo/rexo/releases/latest/download/rexo_0.0.1_windows_amd64.zip).
 2. Right-click the `.zip` → **Extract All**. You get `rexo.exe`.
 3. Open the folder, click the address bar, type `powershell`, press Enter.
 4. Run:
@@ -40,25 +35,12 @@ Verify a check with `rexo doctor` after any install.
    .\rexo.exe init my-first-project
    ```
 
-To run `rexo` from anywhere, move `rexo.exe` into a folder that is on your `PATH`
-(e.g. create `C:\Tools`, add it to *Environment Variables → Path*, put the
-binary there).
+To run `rexo` from anywhere, move `rexo.exe` into a folder on your `PATH`.
 
-### By command line
-
-**While the repo is private** (uses GitHub CLI — install from
-<https://cli.github.com>, then `gh auth login`):
+### By command line (PowerShell)
 
 ```powershell
-gh release download v0.0.1 --repo lanroo/rexo --pattern "rexo_0.0.1_windows_amd64.zip"
-Expand-Archive rexo_0.0.1_windows_amd64.zip -DestinationPath rexo-bin -Force
-.\rexo-bin\rexo.exe doctor
-```
-
-**Once the repo is public** (plain PowerShell, no tools):
-
-```powershell
-Invoke-WebRequest -Uri https://github.com/lanroo/rexo/releases/download/v0.0.1/rexo_0.0.1_windows_amd64.zip -OutFile rexo.zip
+Invoke-WebRequest -Uri https://github.com/lanroo/rexo/releases/latest/download/rexo_0.0.1_windows_amd64.zip -OutFile rexo.zip
 Expand-Archive rexo.zip -DestinationPath rexo-bin -Force
 .\rexo-bin\rexo.exe doctor
 ```
@@ -69,10 +51,9 @@ Expand-Archive rexo.zip -DestinationPath rexo-bin -Force
 
 ### By file
 
-1. Download the archive for your Mac from the
-   [Releases page](https://github.com/lanroo/rexo/releases):
-   `..._darwin_arm64.tar.gz` for Apple Silicon (M1–M4),
-   `..._darwin_amd64.tar.gz` for Intel.
+1. Download the archive for your Mac —
+   [Apple Silicon (M1–M4)](https://github.com/lanroo/rexo/releases/latest/download/rexo_0.0.1_darwin_arm64.tar.gz)
+   or [Intel](https://github.com/lanroo/rexo/releases/latest/download/rexo_0.0.1_darwin_amd64.tar.gz).
    (Apple menu →  **About This Mac** tells you which one.)
 2. Double-click the `.tar.gz` to extract `rexo`.
 3. Open **Terminal**, `cd` into the folder, and run:
@@ -85,21 +66,12 @@ Expand-Archive rexo.zip -DestinationPath rexo-bin -Force
 > First run may warn "unidentified developer". Right-click `rexo` → **Open** →
 > **Open**, or **System Settings → Privacy & Security → Open Anyway**.
 
-### By command line
+### By command line (Terminal)
 
-**While private** (GitHub CLI — `brew install gh`, then `gh auth login`):
-
-```bash
-gh release download v0.0.1 --repo lanroo/rexo --pattern "rexo_0.0.1_darwin_arm64.tar.gz"
-tar -xzf rexo_0.0.1_darwin_arm64.tar.gz
-sudo mv rexo /usr/local/bin/rexo
-rexo doctor
-```
-
-**Once public** (plain `curl`; swap `arm64`→`amd64` on Intel):
+Apple Silicon — swap `arm64`→`amd64` on Intel Macs:
 
 ```bash
-curl -L -o rexo.tar.gz https://github.com/lanroo/rexo/releases/download/v0.0.1/rexo_0.0.1_darwin_arm64.tar.gz
+curl -L -o rexo.tar.gz https://github.com/lanroo/rexo/releases/latest/download/rexo_0.0.1_darwin_arm64.tar.gz
 tar -xzf rexo.tar.gz
 sudo mv rexo /usr/local/bin/rexo
 rexo doctor
@@ -111,8 +83,8 @@ rexo doctor
 
 ### By file
 
-1. Download `rexo_0.0.1_linux_amd64.tar.gz` (or `arm64`) from the
-   [Releases page](https://github.com/lanroo/rexo/releases).
+1. Download [rexo_linux_amd64.tar.gz](https://github.com/lanroo/rexo/releases/latest/download/rexo_0.0.1_linux_amd64.tar.gz)
+   (or [ARM64](https://github.com/lanroo/rexo/releases/latest/download/rexo_0.0.1_linux_arm64.tar.gz)).
 2. Extract it (double-click, or `tar -xzf rexo_0.0.1_linux_amd64.tar.gz`).
 3. In a terminal in that folder:
 
@@ -123,19 +95,10 @@ rexo doctor
 
 ### By command line
 
-**While private** (GitHub CLI — install `gh`, then `gh auth login`):
+x86-64 — swap `amd64`→`arm64` for ARM machines:
 
 ```bash
-gh release download v0.0.1 --repo lanroo/rexo --pattern "rexo_0.0.1_linux_amd64.tar.gz"
-tar -xzf rexo_0.0.1_linux_amd64.tar.gz
-sudo mv rexo /usr/local/bin/rexo
-rexo doctor
-```
-
-**Once public** (plain `curl`; swap `amd64`→`arm64` for ARM):
-
-```bash
-curl -L -o rexo.tar.gz https://github.com/lanroo/rexo/releases/download/v0.0.1/rexo_0.0.1_linux_amd64.tar.gz
+curl -L -o rexo.tar.gz https://github.com/lanroo/rexo/releases/latest/download/rexo_0.0.1_linux_amd64.tar.gz
 tar -xzf rexo.tar.gz
 sudo mv rexo /usr/local/bin/rexo
 rexo doctor
@@ -168,11 +131,11 @@ The binary lands in `$(go env GOPATH)/bin` — make sure that is on your `PATH`.
 
 Each release ships `checksums.txt`. To confirm a file wasn't corrupted:
 
-- **Linux/macOS**: `sha256sum -c checksums.txt` (or `shasum -a 256`)
+- **Linux/macOS**: `shasum -a 256 <file>` (or `sha256sum -c checksums.txt`)
 - **Windows**: `Get-FileHash .\rexo_0.0.1_windows_amd64.zip -Algorithm SHA256`
   and compare with the matching line in `checksums.txt`.
 
 ## Uninstall
 
 REXO writes nothing outside the folders you point it at. To remove it, delete
-the `rexo` / `rexo.exe` binary (and, if you moved it, the copy on your `PATH`).
+the `rexo` / `rexo.exe` binary (and any copy you placed on your `PATH`).
