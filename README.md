@@ -10,6 +10,7 @@ as governed infrastructure instead of hiding them inside large prompts.
 > runtime is not implemented yet.
 
 [Português do Brasil](README.pt-BR.md) ·
+[Install](INSTALL.md) ·
 [Architecture](docs/architecture/constitution.md) ·
 [Roadmap](docs/roadmap/core-v1.md) ·
 [Getting started](docs/getting-started/README.md)
