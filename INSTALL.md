@@ -127,6 +127,31 @@ The binary lands in `$(go env GOPATH)/bin` — make sure that is on your `PATH`.
 
 ---
 
+## Windows security warnings (SmartScreen & Defender)
+
+REXO's `.exe` is **not yet code-signed**, so on Windows you may hit one or both:
+
+1. **"Windows protected your PC" (SmartScreen, blue/purple box)** — click
+   **More info → Run anyway**.
+2. **"...contains a virus or potentially unwanted software" (Defender)** — this
+   is a **false positive**, common for new, unsigned Go programs. The binary is
+   compiled by GitHub Actions from this public source and its SHA-256 matches
+   `checksums.txt` (see below), so you can verify exactly what you are running.
+
+If you trust the source and want to run it anyway:
+
+- Open **Windows Security → Virus & threat protection → Protection history**,
+  find the `rexo.exe` item, and choose **Allow / Restore**; or
+- Add an exclusion for the folder you extracted it into
+  (**Virus & threat protection → Manage settings → Exclusions**).
+
+Only do this for binaries you obtained from the official
+[Releases page](https://github.com/lanroo/rexo/releases) and whose checksum you
+verified. Proper code signing is on the roadmap to remove this friction.
+
+Developers can avoid the warning entirely by building from source or using
+`go install github.com/lanroo/rexo/cmd/rexo@latest`.
+
 ## Verify the download (optional)
 
 Each release ships `checksums.txt`. To confirm a file wasn't corrupted:
