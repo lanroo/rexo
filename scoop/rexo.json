@@ -1,12 +1,12 @@
 {
-    "version": "0.0.2",
+    "version": "0.0.3",
     "description": "REXO — Runtime for Execution & eXchange Orchestration. Capability-first runtime for reusable AI systems (CLI foundation).",
     "homepage": "https://github.com/lanroo/rexo",
     "license": "Apache-2.0",
     "architecture": {
         "64bit": {
-            "url": "https://github.com/lanroo/rexo/releases/download/v0.0.2/rexo_windows_amd64.zip",
-            "hash": "b6666f16271ad98b6409bc03093bb7fa5ef3ee4d1e192e8a42bc41cead0e9319"
+            "url": "https://github.com/lanroo/rexo/releases/download/v0.0.3/rexo_windows_amd64.zip",
+            "hash": "9de9b18a5ccf0f4c96e6635e01c8e9b1f0408ca20731ccc5fb417c169f6515f3"
         }
     },
     "bin": "rexo.exe",
