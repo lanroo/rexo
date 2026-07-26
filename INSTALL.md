@@ -165,8 +165,24 @@ If you trust the source and want to run it anyway:
 
 - Open **Windows Security → Virus & threat protection → Protection history**,
   find the `rexo.exe` item, and choose **Allow / Restore**; or
-- Add an exclusion for the folder you extracted it into
+- Add an exclusion for the folder REXO lives in
   (**Virus & threat protection → Manage settings → Exclusions**).
+
+**If Defender keeps deleting the binary** (e.g. a Scoop install extracts it and
+it disappears, so `rexo` reports "Could not create process"), add a one-time
+folder exclusion from an **Administrator** PowerShell, then reinstall:
+
+```powershell
+# Scoop install — exclude the scoop folder (adjust the path to your user):
+Add-MpPreference -ExclusionPath "$HOME\scoop"
+scoop uninstall rexo
+scoop install https://raw.githubusercontent.com/lanroo/rexo/main/scoop/rexo.json
+rexo version
+```
+
+Adding the exclusion needs admin once; **running `rexo` itself never needs
+admin**. The exclusion is a temporary measure until the false-positive report
+clears or the binary is code-signed.
 
 Only do this for binaries you obtained from the official
 [Releases page](https://github.com/lanroo/rexo/releases) and whose checksum you
