@@ -45,6 +45,16 @@ flowchart TB
     Packs["Capability Packs"] --> Registry
 ```
 
+## Install
+
+| Platform | Command |
+|---|---|
+| macOS / Linux | `brew install lanroo/tap/rexo` |
+| Windows | `scoop bucket add rexo https://github.com/lanroo/rexo` then `scoop install rexo` |
+| Any (Go devs) | `go install github.com/lanroo/rexo/cmd/rexo@latest` |
+
+See [INSTALL.md](INSTALL.md) for manual downloads and troubleshooting.
+
 ## Build from source
 
 Requirements: Go 1.24 or later and Git.

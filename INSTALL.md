@@ -3,6 +3,16 @@
 REXO is a single self-contained binary. No Python, Node, Docker, or LLM account
 is required to run it.
 
+## Quick install
+
+| Platform | Command |
+|---|---|
+| **macOS / Linux** | `brew install lanroo/tap/rexo` |
+| **Windows** | `scoop bucket add rexo https://github.com/lanroo/rexo` then `scoop install rexo` |
+| **Any (Go devs)** | `go install github.com/lanroo/rexo/cmd/rexo@latest` |
+
+Then run `rexo doctor`. Details, manual downloads, and troubleshooting below.
+
 Pick your operating system, then choose **by file** (download + click) or **by
 command line**. After any install, run `rexo doctor` to confirm it works.
 
@@ -77,6 +87,15 @@ Expand-Archive rexo.zip -DestinationPath rexo-bin -Force
 
 ## macOS
 
+### Recommended: Homebrew
+
+```bash
+brew install lanroo/tap/rexo
+rexo doctor
+```
+
+Update later with `brew upgrade rexo`.
+
 ### By file
 
 1. Download the archive for your Mac —
@@ -108,6 +127,15 @@ rexo doctor
 ---
 
 ## Linux
+
+### Recommended: Homebrew
+
+If you use [Homebrew on Linux](https://docs.brew.sh/Homebrew-on-Linux):
+
+```bash
+brew install lanroo/tap/rexo
+rexo doctor
+```
 
 ### By file
 
