@@ -6,10 +6,13 @@ import (
 	"flag"
 	"fmt"
 	"io"
+	"path/filepath"
 	"runtime"
 
 	"github.com/lanroo/rexo/internal/doctor"
+	"github.com/lanroo/rexo/internal/kernel"
 	"github.com/lanroo/rexo/internal/project"
+	"github.com/lanroo/rexo/internal/workflow"
 )
 
 type BuildInfo struct {
@@ -34,6 +37,8 @@ func Run(args []string, stdout, stderr io.Writer, build BuildInfo) int {
 		return runDoctor(args[1:], stdout, stderr)
 	case "init":
 		return runInit(args[1:], stdout, stderr)
+	case "run":
+		return runRun(args[1:], stdout, stderr)
 	default:
 		fmt.Fprintf(stderr, "unknown command %q\n\n", args[0])
 		printHelp(stderr)
@@ -120,7 +125,54 @@ func runInit(args []string, stdout, stderr io.Writer) int {
 	}
 
 	fmt.Fprintf(stdout, "Created REXO project %q at %s\n", result.Name, result.Path)
-	fmt.Fprintf(stdout, "Next: cd %s\n", result.Path)
+	fmt.Fprintf(stdout, "Next:\n  cd %s\n  rexo run workflow.json\n", result.Path)
+	return 0
+}
+
+func runRun(args []string, stdout, stderr io.Writer) int {
+	flags := flag.NewFlagSet("run", flag.ContinueOnError)
+	flags.SetOutput(stderr)
+	projectDir := flags.String("project", ".", "project directory that holds .rexo")
+	replay := flags.String("replay", "", "verify determinism against a recorded run id")
+	if err := flags.Parse(args); err != nil {
+		return 2
+	}
+	if flags.NArg() != 1 {
+		fmt.Fprintln(stderr, "usage: rexo run <workflow.json> [--project <dir>] [--replay <run-id>]")
+		return 2
+	}
+
+	wf, err := workflow.Load(flags.Arg(0))
+	if err != nil {
+		fmt.Fprintf(stderr, "load workflow: %v\n", err)
+		return 1
+	}
+	opt := kernel.Options{ProjectDir: *projectDir}
+
+	if *replay != "" {
+		res, err := kernel.Replay(wf, opt, *replay)
+		if err != nil {
+			fmt.Fprintf(stderr, "replay failed: %v\n", err)
+			return 1
+		}
+		fmt.Fprintf(stdout, "Replay OK: %d task(s) reproduced identical output for run %s\n", res.Checked, res.RunID)
+		return 0
+	}
+
+	trace, err := kernel.Run(wf, opt)
+	if err != nil {
+		fmt.Fprintf(stderr, "run failed: %v\n", err)
+		if trace != nil {
+			fmt.Fprintf(stderr, "diagnosable trace: %s\n",
+				filepath.Join(*projectDir, ".rexo", "runs", trace.RunID, "trace.json"))
+		}
+		return 1
+	}
+
+	fmt.Fprintf(stdout, "Run %s: %s (%d task(s))\n", trace.RunID, trace.Status, len(trace.Tasks))
+	fmt.Fprintf(stdout, "  trace:     %s\n", filepath.Join(*projectDir, ".rexo", "runs", trace.RunID, "trace.json"))
+	fmt.Fprintf(stdout, "  artifacts: %s\n", filepath.Join(*projectDir, ".rexo", "artifacts"))
+	fmt.Fprintf(stdout, "Replay to verify: rexo run %s --replay %s\n", flags.Arg(0), trace.RunID)
 	return 0
 }
 
@@ -142,6 +194,7 @@ Try one of these:
 
   rexo doctor              Check that your machine is ready
   rexo init my-project     Create a new REXO project
+  rexo run workflow.json   Execute a workflow
   rexo version             Show version details
   rexo help                Show the full command list
 
@@ -163,7 +216,8 @@ Commands:
   version   Show version and platform information
   doctor    Validate this machine for REXO
   init      Create a new REXO project
+  run       Execute a workflow (deterministic; --replay verifies it)
   help      Show this help
 
-This is the v0.0.1 public foundation. It does not call an LLM.`)
+This is a foundation release. Workflows are deterministic and do not call an LLM.`)
 }

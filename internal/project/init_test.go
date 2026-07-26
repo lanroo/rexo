@@ -20,6 +20,7 @@ func TestInitCreatesPortableProject(t *testing.T) {
 
 	required := []string{
 		"rexo.project.json",
+		"workflow.json",
 		"AGENTS.md",
 		"REXO_BOOTSTRAP.md",
 		"REXO_STATE.md",
@@ -39,6 +40,15 @@ func TestInitCreatesPortableProject(t *testing.T) {
 	var decoded map[string]any
 	if err := json.Unmarshal(data, &decoded); err != nil {
 		t.Fatalf("manifest is not valid JSON: %v", err)
+	}
+
+	wfData, err := os.ReadFile(filepath.Join(target, "workflow.json"))
+	if err != nil {
+		t.Fatal(err)
+	}
+	var wf map[string]any
+	if err := json.Unmarshal(wfData, &wf); err != nil {
+		t.Fatalf("scaffolded workflow.json is not valid JSON: %v", err)
 	}
 }
 

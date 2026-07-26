@@ -117,7 +117,53 @@ func writeProject(root, name, id string) error {
 
 	files := map[string][]byte{
 		"rexo.project.json": encoded,
-		"README.md":           []byte("# " + name + "\n\nCreated with REXO.\n"),
+		"workflow.json": []byte(`{
+  "schema_version": "0.1.0",
+  "id": "hello",
+  "version": "0.1.0",
+  "steps": [
+    {
+      "id": "greeting",
+      "capability": "text.constant",
+      "needs": [],
+      "with": { "value": "hello world" }
+    },
+    {
+      "id": "shout",
+      "capability": "text.uppercase",
+      "needs": ["greeting"],
+      "with": { "text": { "from_task": "greeting" } }
+    }
+  ]
+}
+`),
+		"README.md": []byte("# " + name + `
+
+A REXO project.
+
+## Run the example workflow
+
+` + "```" + `
+rexo run workflow.json
+` + "```" + `
+
+This executes ` + "`workflow.json`" + ` (a deterministic two-step flow: it builds
+"hello world", then uppercases it to "HELLO WORLD"), storing outputs and an
+execution trace under ` + "`.rexo/runs/`" + `.
+
+Verify the run is reproducible:
+
+` + "```" + `
+rexo run workflow.json --replay <run-id>
+` + "```" + `
+
+## Layout
+
+- ` + "`rexo.project.json`" + ` — project manifest (budget, quality, context)
+- ` + "`workflow.json`" + ` — an editable example workflow
+- ` + "`.rexo/artifacts/`" + ` — content-addressed outputs
+- ` + "`.rexo/runs/`" + ` — one folder per run (trace + event log)
+`),
 		"AGENTS.md": []byte(`# Agent instructions
 
 Before acting, read REXO_BOOTSTRAP.md and REXO_STATE.md.
