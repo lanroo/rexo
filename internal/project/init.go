@@ -1,0 +1,169 @@
+package project
+
+import (
+	"encoding/json"
+	"errors"
+	"fmt"
+	"os"
+	"path/filepath"
+	"regexp"
+	"strings"
+	"time"
+)
+
+var (
+	ErrTargetExists = errors.New("target path already exists")
+	safeName        = regexp.MustCompile(`[^a-z0-9-]+`)
+)
+
+type Result struct {
+	Name string
+	Path string
+}
+
+type manifest struct {
+	SchemaVersion string       `json:"schema_version"`
+	Project       projectBlock `json:"project"`
+	Budget        budgetBlock  `json:"budget"`
+	Context       contextBlock `json:"context"`
+	Quality       qualityBlock `json:"quality"`
+}
+
+type projectBlock struct {
+	ID        string `json:"id"`
+	Name      string `json:"name"`
+	CreatedAt string `json:"created_at"`
+}
+
+type budgetBlock struct {
+	MaxTokens  int `json:"max_tokens"`
+	MaxCalls   int `json:"max_calls"`
+	MaxSeconds int `json:"max_seconds"`
+}
+
+type contextBlock struct {
+	Strategy string   `json:"strategy"`
+	Layers   []string `json:"layers"`
+}
+
+type qualityBlock struct {
+	MinimumScore float64 `json:"minimum_score"`
+	MaxAttempts  int     `json:"max_attempts"`
+}
+
+func Init(target string) (Result, error) {
+	if strings.TrimSpace(target) == "" {
+		return Result{}, errors.New("target path cannot be empty")
+	}
+
+	absolute, err := filepath.Abs(target)
+	if err != nil {
+		return Result{}, fmt.Errorf("resolve target: %w", err)
+	}
+	if _, err := os.Stat(absolute); err == nil {
+		return Result{}, fmt.Errorf("%w: %s", ErrTargetExists, absolute)
+	} else if !errors.Is(err, os.ErrNotExist) {
+		return Result{}, fmt.Errorf("inspect target: %w", err)
+	}
+
+	name := filepath.Base(absolute)
+	id := slug(name)
+	if id == "" {
+		return Result{}, errors.New("project directory must contain letters or numbers")
+	}
+
+	parent := filepath.Dir(absolute)
+	if err := os.MkdirAll(parent, 0o755); err != nil {
+		return Result{}, fmt.Errorf("create parent directory: %w", err)
+	}
+	staging, err := os.MkdirTemp(parent, ".rexo-init-*")
+	if err != nil {
+		return Result{}, fmt.Errorf("create staging directory: %w", err)
+	}
+	committed := false
+	defer func() {
+		if !committed {
+			_ = os.RemoveAll(staging)
+		}
+	}()
+
+	if err := writeProject(staging, name, id); err != nil {
+		return Result{}, err
+	}
+	if err := os.Rename(staging, absolute); err != nil {
+		return Result{}, fmt.Errorf("commit project: %w", err)
+	}
+	committed = true
+	return Result{Name: name, Path: absolute}, nil
+}
+
+func writeProject(root, name, id string) error {
+	now := time.Now().UTC().Format(time.RFC3339)
+	data := manifest{
+		SchemaVersion: "0.1.0",
+		Project:       projectBlock{ID: id, Name: name, CreatedAt: now},
+		Budget:        budgetBlock{MaxTokens: 100_000, MaxCalls: 100, MaxSeconds: 3_600},
+		Context: contextBlock{
+			Strategy: "minimum-necessary",
+			Layers:   []string{"global", "project", "execution", "task"},
+		},
+		Quality: qualityBlock{MinimumScore: 0.8, MaxAttempts: 3},
+	}
+	encoded, err := json.MarshalIndent(data, "", "  ")
+	if err != nil {
+		return fmt.Errorf("encode manifest: %w", err)
+	}
+	encoded = append(encoded, '\n')
+
+	files := map[string][]byte{
+		"rexo.project.json": encoded,
+		"README.md":           []byte("# " + name + "\n\nCreated with REXO.\n"),
+		"AGENTS.md": []byte(`# Agent instructions
+
+Before acting, read REXO_BOOTSTRAP.md and REXO_STATE.md.
+Load only the context required for the current task.
+Never place secrets, runtime memory, or generated cache in Git.
+`),
+		"REXO_BOOTSTRAP.md": []byte(`# REXO bootstrap
+
+1. Read this file.
+2. Read REXO_STATE.md.
+3. Read only relevant ADRs and artifacts.
+4. Confirm task objective, inputs, budget, and success criteria.
+5. Reuse valid artifacts before invoking an LLM.
+`),
+		"REXO_STATE.md": []byte(`# Project state
+
+Status: initialized
+Current phase: foundation
+Last verified: ` + now + `
+`),
+		".gitignore": []byte(`.env
+.env.*
+!.env.example
+.rexo/cache/
+.rexo/memory/runtime/
+.rexo/secrets/
+dist/
+`),
+		".rexo/artifacts/README.md": []byte("# Artifacts\n\nReusable, versioned project outputs belong here.\n"),
+		".rexo/memory/README.md":    []byte("# Memory\n\nStore curated project memory here. Runtime memory is ignored by Git.\n"),
+	}
+
+	for path, contents := range files {
+		fullPath := filepath.Join(root, filepath.FromSlash(path))
+		if err := os.MkdirAll(filepath.Dir(fullPath), 0o755); err != nil {
+			return fmt.Errorf("create directory for %s: %w", path, err)
+		}
+		if err := os.WriteFile(fullPath, contents, 0o644); err != nil {
+			return fmt.Errorf("write %s: %w", path, err)
+		}
+	}
+	return nil
+}
+
+func slug(value string) string {
+	value = strings.ToLower(strings.TrimSpace(value))
+	value = safeName.ReplaceAllString(value, "-")
+	return strings.Trim(value, "-")
+}
