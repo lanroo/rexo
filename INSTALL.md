@@ -44,7 +44,12 @@ rexo init my-first-project
 
 Update later with `scoop update rexo`.
 
-> Prefer to do it by hand? `scoop install https://raw.githubusercontent.com/lanroo/rexo/main/scoop/rexo.json`
+> Prefer to do it by hand (if you already have Scoop)?
+>
+> ```powershell
+> scoop bucket add rexo https://github.com/lanroo/rexo
+> scoop install rexo
+> ```
 
 ### By file (no command line)
 

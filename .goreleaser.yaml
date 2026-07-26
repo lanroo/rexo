@@ -45,6 +45,18 @@ checksum:
   name_template: checksums.txt
   algorithm: sha256
 
+scoops:
+  - repository:
+      owner: lanroo
+      name: rexo
+    directory: bucket
+    homepage: "https://github.com/lanroo/rexo"
+    description: "REXO — Runtime for Execution & eXchange Orchestration."
+    license: Apache-2.0
+    commit_author:
+      name: goreleaser-bot
+      email: bot@rexo.dev
+
 changelog:
   sort: asc
   filters:

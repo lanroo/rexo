@@ -27,13 +27,16 @@ if (-not (Get-Command scoop -ErrorAction SilentlyContinue)) {
 }
 
 # 2. Install (or update) REXO from this repo's manifest.
-$manifest = 'https://raw.githubusercontent.com/lanroo/rexo/main/scoop/rexo.json'
+if (-not (scoop bucket list | Select-String -SimpleMatch 'rexo')) {
+    Write-Step "Adding the REXO bucket..."
+    scoop bucket add rexo https://github.com/lanroo/rexo
+}
 if (scoop list rexo 6>$null | Select-String -SimpleMatch 'rexo') {
     Write-Step "Updating REXO..."
     scoop update rexo
 } else {
     Write-Step "Installing REXO..."
-    scoop install $manifest
+    scoop install rexo
 }
 
 Write-Host ""
