@@ -57,6 +57,21 @@ scoops:
       name: goreleaser-bot
       email: bot@rexo.dev
 
+brews:
+  - repository:
+      owner: lanroo
+      name: homebrew-tap
+      token: "{{ .Env.HOMEBREW_TAP_TOKEN }}"
+    directory: Formula
+    homepage: "https://github.com/lanroo/rexo"
+    description: "REXO — Runtime for Execution & eXchange Orchestration."
+    license: "Apache-2.0"
+    commit_author:
+      name: goreleaser-bot
+      email: bot@rexo.dev
+    test: |
+      system "#{bin}/rexo", "version"
+
 changelog:
   sort: asc
   filters:
