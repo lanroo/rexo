@@ -1,0 +1,49 @@
+{
+  "$schema": "https://schemas.rexo.dev/v0.1/capability.schema.json",
+  "schema_version": "0.1.0",
+  "id": "text.generate",
+  "version": "1.0.0",
+  "description": "Generate text from a prompt using a language-model provider. Provider-independent: any adapter that satisfies this contract may serve it.",
+  "input_schema": {
+    "type": "object",
+    "additionalProperties": false,
+    "required": ["prompt"],
+    "properties": {
+      "prompt": {
+        "type": "string",
+        "minLength": 1,
+        "description": "The instruction or question for the model."
+      },
+      "system": {
+        "type": "string",
+        "description": "Optional system role/persona guidance."
+      },
+      "max_tokens": {
+        "type": "integer",
+        "minimum": 1,
+        "description": "Optional soft cap on output length; adapters map it to the provider's own flag when supported."
+      }
+    }
+  },
+  "output_schema": {
+    "type": "object",
+    "additionalProperties": false,
+    "required": ["text", "provider_id"],
+    "properties": {
+      "text": {
+        "type": "string",
+        "description": "The generated text."
+      },
+      "provider_id": {
+        "type": "string",
+        "description": "Which adapter produced the output, e.g. claude-code, codex, ollama."
+      },
+      "model_id": {
+        "type": "string",
+        "description": "Provider-reported model identifier, when the CLI exposes it."
+      }
+    }
+  },
+  "side_effects": ["network-read"],
+  "quality_dimensions": ["relevance", "coherence"]
+}
