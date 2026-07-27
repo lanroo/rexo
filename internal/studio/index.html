@@ -6,103 +6,180 @@
 <title>REXO Studio</title>
 <style>
   :root {
-    --bg: #0b0e14; --panel: #141925; --panel-2: #1b2130; --border: #232b3d;
-    --text: #e6ebf5; --muted: #8b97ad; --accent: #5b8cff; --accent-2: #7c5cff;
-    --ok: #38d39f; --warn: #ffb454; --err: #ff6b6b;
+    --bg: #090b11; --bg-2: #0d1017; --panel: #12161f; --panel-2: #171c28;
+    --border: #212838; --border-2: #2c3446; --border-strong: #33405a;
+    --text: #eef2f9; --muted: #9aa6bd; --faint: #6b7688;
+    --accent: #6d8bff; --accent-2: #a06bff; --accent-soft: rgba(109,139,255,.14);
+    --ok: #37d9a6; --warn: #ffbf5b; --err: #ff6f6f;
+    --r: 14px; --r-sm: 10px; --r-lg: 20px;
+    --shadow: 0 10px 40px -12px rgba(0,0,0,.6);
   }
   * { box-sizing: border-box; }
+  html, body { margin: 0; }
   body {
-    margin: 0; background: var(--bg); color: var(--text);
-    font: 15px/1.55 -apple-system, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+    background:
+      radial-gradient(1100px 500px at 80% -10%, rgba(160,107,255,.10), transparent 60%),
+      radial-gradient(900px 500px at 0% 0%, rgba(109,139,255,.10), transparent 55%),
+      var(--bg);
+    color: var(--text); min-height: 100vh;
+    font: 15px/1.6 ui-sans-serif, -apple-system, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+    -webkit-font-smoothing: antialiased;
   }
-  .wrap { max-width: 860px; margin: 0 auto; padding: 32px 20px 80px; }
-  header h1 { margin: 0; font-size: 26px; letter-spacing: -0.3px; }
-  header .sub { color: var(--muted); margin-top: 4px; }
-  .brand { color: var(--accent); }
-  .status {
-    display: flex; gap: 8px; flex-wrap: wrap; align-items: center;
-    margin: 18px 0 24px; font-size: 13px; color: var(--muted);
-  }
-  .pill {
-    display: inline-flex; align-items: center; gap: 6px;
-    background: var(--panel); border: 1px solid var(--border);
-    border-radius: 999px; padding: 4px 10px;
-  }
-  .dot { width: 8px; height: 8px; border-radius: 50%; background: var(--muted); }
-  .dot.ok { background: var(--ok); } .dot.warn { background: var(--warn); }
-  .card {
-    background: var(--panel); border: 1px solid var(--border);
-    border-radius: 14px; padding: 20px;
-  }
-  label { display: block; font-size: 12px; color: var(--muted); margin-bottom: 6px; }
-  input, select, textarea, button { font: inherit; }
-  input[type=text] {
-    width: 100%; background: var(--panel-2); color: var(--text);
-    border: 1px solid var(--border); border-radius: 10px; padding: 12px 14px;
-  }
-  .controls { display: flex; gap: 12px; flex-wrap: wrap; align-items: flex-end; margin-top: 14px; }
-  .controls .field { flex: 1 1 150px; min-width: 130px; }
-  .controls select {
-    width: 100%; background: var(--panel-2); color: var(--text);
-    border: 1px solid var(--border); border-radius: 10px; padding: 11px 12px;
-  }
-  input:focus, select:focus { outline: 2px solid var(--accent); outline-offset: 0; }
-  button.go {
+  a { color: var(--accent); }
+  .app { max-width: 940px; margin: 0 auto; padding: 22px 22px 90px; }
+
+  /* Top bar */
+  .bar { display: flex; align-items: center; gap: 12px; padding: 6px 0 26px; }
+  .mark {
+    width: 34px; height: 34px; border-radius: 9px; flex: 0 0 auto;
     background: linear-gradient(135deg, var(--accent), var(--accent-2));
-    color: white; border: 0; border-radius: 10px; padding: 12px 22px;
-    font-weight: 600; cursor: pointer; height: 44px; flex: 0 0 auto;
+    display: grid; place-items: center; color: #fff; font-weight: 800; font-size: 18px;
+    box-shadow: 0 6px 18px -6px rgba(109,139,255,.6);
   }
-  button.go:disabled { opacity: 0.5; cursor: default; }
-  .hint { color: var(--muted); font-size: 13px; margin-top: 14px; }
-  .steps { margin-top: 24px; display: grid; gap: 14px; }
-  .step {
-    background: var(--panel); border: 1px solid var(--border);
-    border-radius: 12px; padding: 16px 18px; opacity: 0; transform: translateY(6px);
-    animation: rise .35s ease forwards;
+  .bar h1 { margin: 0; font-size: 18px; font-weight: 650; letter-spacing: -.2px; }
+  .bar h1 span { color: var(--muted); font-weight: 500; }
+  .bar .spacer { flex: 1; }
+  .provs { display: flex; gap: 6px; flex-wrap: wrap; justify-content: flex-end; }
+  .pill {
+    display: inline-flex; align-items: center; gap: 6px; font-size: 12px; color: var(--muted);
+    background: var(--panel); border: 1px solid var(--border); border-radius: 999px; padding: 4px 10px;
+  }
+  .dot { width: 7px; height: 7px; border-radius: 50%; background: var(--faint); }
+  .dot.ok { background: var(--ok); box-shadow: 0 0 0 3px rgba(55,217,166,.15); }
+  .dot.warn { background: var(--warn); }
+
+  /* Hero */
+  .hero {
+    background: linear-gradient(180deg, var(--panel), var(--bg-2));
+    border: 1px solid var(--border); border-radius: var(--r-lg); padding: 26px;
+    box-shadow: var(--shadow);
+  }
+  .hero .eyebrow { color: var(--muted); font-size: 13px; margin: 0 0 14px; }
+  .hero .eyebrow b { color: var(--text); }
+  label { display: block; font-size: 12px; color: var(--muted); margin-bottom: 6px; letter-spacing: .1px; }
+  .qbox {
+    display: flex; align-items: center; gap: 10px; background: var(--panel-2);
+    border: 1px solid var(--border-strong); border-radius: var(--r); padding: 4px 4px 4px 16px;
+    transition: border-color .15s, box-shadow .15s;
+  }
+  .qbox:focus-within { border-color: var(--accent); box-shadow: 0 0 0 4px var(--accent-soft); }
+  .qbox input {
+    flex: 1; min-width: 0; background: none; border: 0; color: var(--text);
+    font: inherit; font-size: 17px; padding: 12px 0; outline: none;
+  }
+  .qbox input::placeholder { color: var(--faint); }
+  button.go {
+    border: 0; border-radius: var(--r-sm); cursor: pointer; font: inherit; font-weight: 650;
+    color: #fff; padding: 12px 22px; height: 46px; white-space: nowrap;
+    background: linear-gradient(135deg, var(--accent), var(--accent-2));
+    box-shadow: 0 8px 20px -8px rgba(109,139,255,.7); transition: transform .1s, opacity .15s;
+  }
+  button.go:hover:not(:disabled) { transform: translateY(-1px); }
+  button.go:disabled { opacity: .5; cursor: default; box-shadow: none; }
+  .controls { display: flex; gap: 14px; flex-wrap: wrap; margin-top: 16px; }
+  .controls .field { flex: 1 1 160px; min-width: 140px; }
+  select {
+    width: 100%; background: var(--panel-2); color: var(--text); font: inherit;
+    border: 1px solid var(--border-strong); border-radius: var(--r-sm); padding: 11px 12px;
+    outline: none; transition: border-color .15s, box-shadow .15s;
+  }
+  select:focus { border-color: var(--accent); box-shadow: 0 0 0 4px var(--accent-soft); }
+  .hint { color: var(--faint); font-size: 12.5px; margin-top: 16px; }
+  .hint b { color: var(--muted); }
+
+  /* Pipeline stepper */
+  .pipe { display: flex; align-items: center; margin: 30px 2px 6px; }
+  .node { display: flex; flex-direction: column; align-items: center; gap: 8px; flex: 0 0 auto; width: 92px; }
+  .node .ring {
+    width: 30px; height: 30px; border-radius: 50%; display: grid; place-items: center;
+    border: 2px solid var(--border-strong); color: var(--faint); font-size: 13px; font-weight: 700;
+    background: var(--panel); transition: all .3s;
+  }
+  .node .lbl { font-size: 11.5px; color: var(--faint); text-align: center; transition: color .3s; }
+  .node.active .ring {
+    border-color: var(--accent); color: var(--accent);
+    box-shadow: 0 0 0 5px var(--accent-soft); animation: pulse 1.4s infinite;
+  }
+  .node.active .lbl { color: var(--text); }
+  .node.done .ring { border-color: var(--ok); background: var(--ok); color: #06231a; }
+  .node.done .lbl { color: var(--muted); }
+  .link { flex: 1; height: 2px; background: var(--border); position: relative; overflow: hidden; }
+  .link.filled { background: linear-gradient(90deg, var(--ok), var(--accent)); }
+  @keyframes pulse { 0%,100% { box-shadow: 0 0 0 5px var(--accent-soft); } 50% { box-shadow: 0 0 0 9px rgba(109,139,255,.05); } }
+
+  /* Steps */
+  .steps { margin-top: 22px; display: grid; gap: 16px; }
+  .card {
+    background: var(--panel); border: 1px solid var(--border); border-radius: var(--r);
+    padding: 18px 20px; opacity: 0; transform: translateY(8px); animation: rise .4s ease forwards;
   }
   @keyframes rise { to { opacity: 1; transform: none; } }
-  .step h3 { margin: 0 0 4px; font-size: 15px; }
-  .badges { display: flex; gap: 6px; margin: 6px 0 10px; flex-wrap: wrap; }
+  .card .head { display: flex; align-items: center; gap: 10px; margin-bottom: 10px; }
+  .card .head h3 { margin: 0; font-size: 15.5px; font-weight: 650; flex: 1; }
+  .badges { display: flex; gap: 6px; flex-wrap: wrap; }
   .badge {
-    font-size: 11px; padding: 2px 8px; border-radius: 999px;
-    background: var(--panel-2); border: 1px solid var(--border); color: var(--muted);
+    font-size: 11px; padding: 2px 8px; border-radius: 999px; color: var(--muted);
+    background: var(--panel-2); border: 1px solid var(--border);
   }
-  .badge.cache { color: var(--ok); border-color: rgba(56,211,159,.4); }
-  .step pre {
-    margin: 0; white-space: pre-wrap; word-wrap: break-word; font: inherit; color: var(--text);
+  .badge.cache { color: var(--ok); border-color: rgba(55,217,166,.4); }
+  .copy {
+    background: none; border: 1px solid var(--border); color: var(--muted); cursor: pointer;
+    border-radius: 8px; padding: 4px 9px; font-size: 12px; transition: all .15s;
   }
-  .pending { display: flex; align-items: center; gap: 10px; color: var(--muted); }
-  .spinner {
-    width: 16px; height: 16px; border-radius: 50%;
-    border: 2px solid var(--border); border-top-color: var(--accent);
-    animation: spin .8s linear infinite;
-  }
+  .copy:hover { border-color: var(--accent); color: var(--text); }
+  .md { color: #dfe6f2; }
+  .md h3, .md h4, .md h5 { margin: 14px 0 6px; color: var(--text); font-size: 14.5px; }
+  .md p { margin: 8px 0; }
+  .md ol, .md ul { margin: 8px 0; padding-left: 22px; }
+  .md li { margin: 4px 0; }
+  .md code { background: var(--panel-2); border: 1px solid var(--border); border-radius: 6px; padding: 1px 5px; font-size: 13px; }
+  .md strong { color: #fff; }
+
+  .pending { display: flex; align-items: center; gap: 12px; color: var(--muted); padding: 6px 2px; }
+  .spinner { width: 18px; height: 18px; border-radius: 50%; border: 2px solid var(--border-strong); border-top-color: var(--accent); animation: spin .8s linear infinite; }
   @keyframes spin { to { transform: rotate(360deg); } }
-  .done {
-    margin-top: 20px; padding: 14px 16px; border-radius: 12px;
-    background: rgba(56,211,159,.08); border: 1px solid rgba(56,211,159,.3);
+
+  /* Summary bar */
+  .summary {
+    margin-top: 22px; border-radius: var(--r); padding: 16px 18px;
+    background: linear-gradient(180deg, rgba(55,217,166,.09), rgba(55,217,166,.03));
+    border: 1px solid rgba(55,217,166,.28);
+    display: flex; align-items: center; gap: 20px; flex-wrap: wrap;
   }
-  .done code { color: var(--ok); }
+  .summary .stat { display: flex; flex-direction: column; }
+  .summary .stat .k { font-size: 18px; font-weight: 700; }
+  .summary .stat .v { font-size: 11.5px; color: var(--muted); }
+  .summary .grow { flex: 1; }
+  .summary code { color: var(--ok); font-size: 12.5px; word-break: break-all; }
+  .btn-ghost {
+    background: none; border: 1px solid rgba(55,217,166,.4); color: var(--ok); cursor: pointer;
+    border-radius: 9px; padding: 9px 14px; font: inherit; font-weight: 600; transition: all .15s;
+  }
+  .btn-ghost:hover { background: rgba(55,217,166,.12); }
   .error {
-    margin-top: 20px; padding: 14px 16px; border-radius: 12px;
-    background: rgba(255,107,107,.08); border: 1px solid rgba(255,107,107,.3); color: var(--err);
+    margin-top: 22px; padding: 15px 18px; border-radius: var(--r); color: var(--err);
+    background: rgba(255,111,111,.08); border: 1px solid rgba(255,111,111,.3); white-space: pre-wrap;
   }
+  footer { color: var(--faint); font-size: 12px; text-align: center; margin-top: 40px; }
   [hidden] { display: none !important; }
 </style>
 </head>
 <body>
-<div class="wrap">
-  <header>
-    <h1><span class="brand">REXO</span> Studio</h1>
-    <div class="sub">Describe a goal. Choose your AI. Watch it build, step by step.</div>
-  </header>
+<div class="app">
+  <div class="bar">
+    <div class="mark">R</div>
+    <h1>REXO <span>Studio</span></h1>
+    <div class="spacer"></div>
+    <div class="provs" id="provs"><span class="pill"><span class="dot"></span> checking…</span></div>
+  </div>
 
-  <div class="status" id="status"><span class="pill"><span class="dot"></span> checking providers…</span></div>
-
-  <div class="card">
+  <div class="hero">
+    <p class="eyebrow">Describe a goal. Your <b>AI pipeline</b> plans it, runs it step by step, and hands you the result.</p>
     <label for="topic">What do you want to create?</label>
-    <input id="topic" type="text" placeholder="e.g. React, Photosynthesis, The French Revolution" />
-
+    <div class="qbox">
+      <input id="topic" type="text" placeholder="e.g. React, Photosynthesis, The French Revolution" autocomplete="off" />
+      <button class="go" id="go">Generate</button>
+    </div>
     <div class="controls">
       <div class="field">
         <label for="provider">AI provider</label>
@@ -121,76 +198,106 @@
           <option value="fr">Français</option>
         </select>
       </div>
-      <button class="go" id="go">Generate</button>
     </div>
-
-    <div class="hint">Runs the <b>text.generate</b> capability as a 4-step mini-lesson
-      (summary → objectives → slide outline → quiz). Re-running the same topic on the
-      same model is served from cache — free and instant.</div>
+    <div class="hint">Capability <b>text.generate</b> · a 4-step mini-lesson (summary → objectives → outline → quiz).
+      Re-running the same topic on the same model is served from cache — free and instant.</div>
   </div>
 
+  <div class="pipe" id="pipe" hidden></div>
   <div class="steps" id="steps"></div>
   <div id="tail"></div>
+
+  <footer>REXO · Runtime for Execution &amp; eXchange Orchestration</footer>
 </div>
 
 <script>
 (function () {
   var $ = function (id) { return document.getElementById(id); };
-  var statusEl = $('status'), stepsEl = $('steps'), tailEl = $('tail');
+  var provsEl = $('provs'), pipeEl = $('pipe'), stepsEl = $('steps'), tailEl = $('tail');
   var goBtn = $('go'), topicEl = $('topic'), langEl = $('lang');
   var providerEl = $('provider'), modelEl = $('model'), modelField = $('modelField');
-  var ollamaModels = [];
-  var es = null;
+
+  var STAGES = [
+    { id: 'summary', label: 'Summary' },
+    { id: 'objectives', label: 'Objectives' },
+    { id: 'outline', label: 'Outline' },
+    { id: 'quiz', label: 'Quiz' }
+  ];
+  var ollamaModels = [], es = null, collected = [], startedAt = 0;
 
   function esc(s) { var d = document.createElement('div'); d.textContent = String(s == null ? '' : s); return d.innerHTML; }
-
-  function fill(sel, values, autoLabel) {
+  function fill(sel, values, auto) {
     sel.innerHTML = '';
-    if (autoLabel) { var a = document.createElement('option'); a.value = ''; a.textContent = autoLabel; sel.appendChild(a); }
+    if (auto) { var a = document.createElement('option'); a.value = ''; a.textContent = auto; sel.appendChild(a); }
     values.forEach(function (v) { var o = document.createElement('option'); o.value = v; o.textContent = v; sel.appendChild(o); });
   }
-
   function isOllama(p) { return p === 'ollama' || p === 'ollama-api'; }
-  function syncModelField() {
-    modelField.hidden = !(isOllama(providerEl.value) && ollamaModels.length > 0);
+  function syncModel() { modelField.hidden = !(isOllama(providerEl.value) && ollamaModels.length > 0); }
+
+  // Minimal, safe markdown: escape first, then format headings/lists/bold/code.
+  function md(src) {
+    var out = '', inList = false, tag = '';
+    function inline(s) {
+      return esc(s).replace(/\*\*([^*]+)\*\*/g, '<strong>$1</strong>').replace(/`([^`]+)`/g, '<code>$1</code>');
+    }
+    function close() { if (inList) { out += '</' + tag + '>'; inList = false; } }
+    String(src || '').split('\n').forEach(function (raw) {
+      var line = raw.replace(/\s+$/, '');
+      var h = /^(#{1,4})\s+(.*)$/.exec(line);
+      var ol = /^\s*\d+[.)]\s+(.*)$/.exec(line);
+      var ul = /^\s*[-*]\s+(.*)$/.exec(line);
+      if (h) { close(); var l = Math.min(h[1].length + 2, 5); out += '<h' + l + '>' + inline(h[2]) + '</h' + l + '>'; return; }
+      if (ol) { if (!inList || tag !== 'ol') { close(); tag = 'ol'; inList = true; out += '<ol>'; } out += '<li>' + inline(ol[1]) + '</li>'; return; }
+      if (ul) { if (!inList || tag !== 'ul') { close(); tag = 'ul'; inList = true; out += '<ul>'; } out += '<li>' + inline(ul[1]) + '</li>'; return; }
+      if (line.trim() === '') { close(); return; }
+      close(); out += '<p>' + inline(line) + '</p>';
+    });
+    close();
+    return out;
+  }
+
+  function renderPipe(doneIds) {
+    pipeEl.hidden = false;
+    var html = '';
+    STAGES.forEach(function (st, i) {
+      var done = doneIds.indexOf(st.id) >= 0;
+      var active = !done && doneIds.length === i;
+      var cls = done ? 'done' : (active ? 'active' : '');
+      var inner = done ? '✓' : (i + 1);
+      html += '<div class="node ' + cls + '"><div class="ring">' + inner + '</div><div class="lbl">' + esc(st.label) + '</div></div>';
+      if (i < STAGES.length - 1) html += '<div class="link ' + (done ? 'filled' : '') + '"></div>';
+    });
+    pipeEl.innerHTML = html;
   }
 
   fetch('/api/status').then(function (r) { return r.json(); }).then(function (s) {
-    var provs = (s && s.providers) || [];
-    ollamaModels = (s && s.ollamaModels) || [];
-
+    var provs = (s && s.providers) || []; ollamaModels = (s && s.ollamaModels) || [];
     if (provs.length === 0) {
-      statusEl.innerHTML = '<span class="pill"><span class="dot warn"></span> No AI provider found — install Claude Code, Codex, or Ollama, then reload</span>';
-      goBtn.disabled = true;
-      return;
+      provsEl.innerHTML = '<span class="pill"><span class="dot warn"></span> no AI provider — install Claude Code, Codex, or Ollama</span>';
+      goBtn.disabled = true; return;
     }
-    statusEl.innerHTML = '<span class="pill"><span class="dot ok"></span> AI ready</span>' +
+    provsEl.innerHTML = '<span class="pill"><span class="dot ok"></span> AI ready</span>' +
       provs.map(function (p) { return '<span class="pill">' + esc(p) + '</span>'; }).join('');
-
     fill(providerEl, provs, 'Auto (best available)');
-    fill(modelEl, ollamaModels, '');
-    syncModelField();
+    fill(modelEl, ollamaModels, ''); syncModel();
   }).catch(function () {
-    statusEl.innerHTML = '<span class="pill"><span class="dot warn"></span> could not reach REXO</span>';
+    provsEl.innerHTML = '<span class="pill"><span class="dot warn"></span> could not reach REXO</span>';
   });
 
-  providerEl.addEventListener('change', syncModelField);
-
-  function pending(text) {
-    var el = document.createElement('div');
-    el.className = 'step';
-    el.innerHTML = '<div class="pending"><span class="spinner"></span> ' + esc(text) + '</div>';
-    return el;
-  }
+  providerEl.addEventListener('change', syncModel);
 
   function run() {
     var topic = topicEl.value.trim();
     if (!topic) { topicEl.focus(); return; }
     if (es) es.close();
-    stepsEl.innerHTML = ''; tailEl.innerHTML = ''; goBtn.disabled = true;
+    stepsEl.innerHTML = ''; tailEl.innerHTML = ''; collected = []; startedAt = Date.now();
+    goBtn.disabled = true;
+    renderPipe([]);
 
-    var waiting = pending('Thinking… the AI pipeline is starting');
-    stepsEl.appendChild(waiting);
+    var wait = document.createElement('div');
+    wait.className = 'card';
+    wait.innerHTML = '<div class="pending"><span class="spinner"></span> Planning &amp; generating…</div>';
+    stepsEl.appendChild(wait);
 
     var url = '/api/demo?topic=' + encodeURIComponent(topic) + '&lang=' + encodeURIComponent(langEl.value);
     if (providerEl.value) url += '&provider=' + encodeURIComponent(providerEl.value);
@@ -198,33 +305,63 @@
     es = new EventSource(url);
 
     es.addEventListener('step', function (ev) {
-      if (waiting && waiting.parentNode) { waiting.parentNode.removeChild(waiting); waiting = null; }
+      if (wait && wait.parentNode) { wait.parentNode.removeChild(wait); wait = null; }
       var s = JSON.parse(ev.data);
+      collected.push(s);
+      renderPipe(collected.map(function (c) { return c.ID; }));
+
       var el = document.createElement('div');
-      el.className = 'step';
-      var badges = '<span class="badge">' + esc(s.Provider || 'ai') + '</span>';
-      if (s.Model) badges += '<span class="badge">' + esc(s.Model) + '</span>';
-      badges += s.CacheHit ? '<span class="badge cache">cached</span>'
-        : '<span class="badge">' + Math.round((s.DurationMS || 0) / 100) / 10 + 's</span>';
-      el.innerHTML = '<h3>' + esc(s.Title || s.ID) + '</h3><div class="badges">' + badges +
-        '</div><pre>' + esc((s.Text || '').trim()) + '</pre>';
+      el.className = 'card';
+      var badges = '<span class="badge">' + esc(s.Provider || 'ai') + '</span>' +
+        (s.Model ? '<span class="badge">' + esc(s.Model) + '</span>' : '') +
+        (s.CacheHit ? '<span class="badge cache">cached</span>'
+          : '<span class="badge">' + (Math.round((s.DurationMS || 0) / 100) / 10) + 's</span>');
+      el.innerHTML =
+        '<div class="head"><h3>' + esc(s.Title || s.ID) + '</h3><div class="badges">' + badges + '</div>' +
+        '<button class="copy">Copy</button></div><div class="md">' + md(s.Text) + '</div>';
+      el.querySelector('.copy').addEventListener('click', function () {
+        navigator.clipboard && navigator.clipboard.writeText(String(s.Text || ''));
+        this.textContent = 'Copied'; var b = this; setTimeout(function () { b.textContent = 'Copy'; }, 1200);
+      });
       stepsEl.appendChild(el);
     });
 
     es.addEventListener('done', function (ev) {
       var d = JSON.parse(ev.data);
-      tailEl.innerHTML = '<div class="done">Done ✓ Saved to <code>' + esc(d.outputPath) + '</code>' +
-        (d.fullyCached ? ' &nbsp;·&nbsp; fully cache-served (0 model calls)' : '') + '</div>';
+      renderPipe(STAGES.map(function (s) { return s.id; }));
+      var calls = collected.filter(function (c) { return !c.CacheHit; }).length;
+      var cached = collected.length - calls;
+      var secs = Math.round((Date.now() - startedAt) / 100) / 10;
+
+      var bar = document.createElement('div');
+      bar.className = 'summary';
+      bar.innerHTML =
+        '<div class="stat"><span class="k">' + secs + 's</span><span class="v">total time</span></div>' +
+        '<div class="stat"><span class="k">' + calls + '</span><span class="v">model calls</span></div>' +
+        '<div class="stat"><span class="k">' + cached + '</span><span class="v">from cache</span></div>' +
+        '<div class="grow"><div class="v" style="color:var(--muted)">Saved to</div><code>' + esc(d.outputPath) + '</code></div>' +
+        '<button class="btn-ghost" id="dl">Download .md</button>';
+      tailEl.appendChild(bar);
+      $('dl').addEventListener('click', function () { download(topicEl.value.trim(), collected); });
       es.close(); goBtn.disabled = false;
     });
 
     es.addEventListener('error', function (ev) {
       var msg = 'The run failed.';
       try { msg = JSON.parse(ev.data).message || msg; } catch (e) {}
-      if (waiting && waiting.parentNode) { waiting.parentNode.removeChild(waiting); waiting = null; }
+      if (wait && wait.parentNode) { wait.parentNode.removeChild(wait); wait = null; }
       tailEl.innerHTML = '<div class="error">' + esc(msg) + '</div>';
       es.close(); goBtn.disabled = false;
     });
+  }
+
+  function download(topic, steps) {
+    var body = '# ' + topic + '\n\n';
+    steps.forEach(function (s) { body += '## ' + (s.Title || s.ID) + '\n\n' + String(s.Text || '').trim() + '\n\n'; });
+    var a = document.createElement('a');
+    a.href = URL.createObjectURL(new Blob([body], { type: 'text/markdown' }));
+    a.download = (topic || 'lesson').toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/^-|-$/g, '') + '.md';
+    a.click(); URL.revokeObjectURL(a.href);
   }
 
   goBtn.addEventListener('click', run);
