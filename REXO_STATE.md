@@ -3,7 +3,7 @@
 - Product name: REXO
 - Expansion: Runtime for Execution & eXchange Orchestration
 - Naming history: AIOS (codename) → AIOREN → REXO; AIOS/AIOREN survive only in historical documents. See ADR 0004.
-- Current release target: v0.0.8
+- Current release target: v0.0.9
 - Install channels: Homebrew (`brew install lanroo/tap/rexo`, tap repo `lanroo/homebrew-tap`) and Scoop (`scoop bucket add rexo <repo>` + `scoop install rexo`, bucket in `bucket/`), both auto-published by goreleaser (brews + scoops) each release; also `go install`. Homebrew needs the `HOMEBREW_TAP_TOKEN` repo secret (maintainer-only, one-time).
 - Current phase: Phase 2 — First probabilistic capability (in progress, branch `phase-2-first-capability`)
 - Branch: `codex/foundation-v0.0.1` (deterministic core); `phase-2-first-capability` (first AI capability)
