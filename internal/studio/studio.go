@@ -13,6 +13,7 @@ import (
 	"net/http"
 
 	"github.com/lanroo/rexo/internal/demo"
+	"github.com/lanroo/rexo/internal/pipeline"
 	"github.com/lanroo/rexo/internal/providers"
 )
 
@@ -97,6 +98,60 @@ func Serve(opt Options, stdout io.Writer) error {
 			"outputPath":  result.OutputPath,
 			"fullyCached": result.FullyCached,
 		})
+	})
+
+	mux.HandleFunc("/api/run", func(w http.ResponseWriter, r *http.Request) {
+		if r.Method != http.MethodPost {
+			http.Error(w, "POST required", http.StatusMethodNotAllowed)
+			return
+		}
+		var body struct {
+			Topic    string          `json:"topic"`
+			Lang     string          `json:"lang"`
+			Provider string          `json:"provider"`
+			Model    string          `json:"model"`
+			Steps    []pipeline.Step `json:"steps"`
+		}
+		if err := json.NewDecoder(r.Body).Decode(&body); err != nil {
+			http.Error(w, "bad request", http.StatusBadRequest)
+			return
+		}
+		flusher, ok := w.(http.Flusher)
+		if !ok {
+			http.Error(w, "streaming unsupported", http.StatusInternalServerError)
+			return
+		}
+		w.Header().Set("Content-Type", "application/x-ndjson")
+
+		send := func(event string, data any) {
+			line, _ := json.Marshal(map[string]any{"event": event, "data": data})
+			_, _ = w.Write(append(line, '\n'))
+			flusher.Flush()
+		}
+
+		provider := body.Provider
+		if provider == "" {
+			provider = opt.Provider
+		}
+		model := body.Model
+		if model == "" {
+			model = opt.Model
+		}
+
+		result, err := pipeline.Run(r.Context(), pipeline.Options{
+			Topic:      body.Topic,
+			Lang:       body.Lang,
+			Provider:   provider,
+			Model:      model,
+			ProjectDir: opt.ProjectDir,
+			Steps:      body.Steps,
+			Progress:   func(s pipeline.StepResult) { send("step", s) },
+		})
+		if err != nil {
+			send("error", map[string]string{"message": err.Error()})
+			return
+		}
+		send("done", map[string]any{"outputPath": result.OutputPath, "fullyCached": result.FullyCached})
 	})
 
 	ln, err := net.Listen("tcp", opt.Addr)
