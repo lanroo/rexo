@@ -1,0 +1,207 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>REXO Studio</title>
+<style>
+  :root {
+    --bg: #0b0e14; --panel: #141925; --panel-2: #1b2130; --border: #232b3d;
+    --text: #e6ebf5; --muted: #8b97ad; --accent: #5b8cff; --accent-2: #7c5cff;
+    --ok: #38d39f; --warn: #ffb454; --err: #ff6b6b;
+  }
+  * { box-sizing: border-box; }
+  body {
+    margin: 0; background: var(--bg); color: var(--text);
+    font: 15px/1.55 -apple-system, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+  }
+  .wrap { max-width: 860px; margin: 0 auto; padding: 32px 20px 80px; }
+  header h1 { margin: 0; font-size: 26px; letter-spacing: -0.3px; }
+  header .sub { color: var(--muted); margin-top: 4px; }
+  .brand { color: var(--accent); }
+  .status {
+    display: flex; gap: 8px; flex-wrap: wrap; align-items: center;
+    margin: 18px 0 24px; font-size: 13px; color: var(--muted);
+  }
+  .pill {
+    display: inline-flex; align-items: center; gap: 6px;
+    background: var(--panel); border: 1px solid var(--border);
+    border-radius: 999px; padding: 4px 10px;
+  }
+  .dot { width: 8px; height: 8px; border-radius: 50%; background: var(--muted); }
+  .dot.ok { background: var(--ok); } .dot.warn { background: var(--warn); }
+  .card {
+    background: var(--panel); border: 1px solid var(--border);
+    border-radius: 14px; padding: 20px;
+  }
+  label { display: block; font-size: 13px; color: var(--muted); margin-bottom: 6px; }
+  input, select, textarea, button { font: inherit; }
+  .row { display: flex; gap: 12px; flex-wrap: wrap; }
+  input[type=text] {
+    flex: 1 1 320px; min-width: 0; background: var(--panel-2); color: var(--text);
+    border: 1px solid var(--border); border-radius: 10px; padding: 12px 14px;
+  }
+  select {
+    background: var(--panel-2); color: var(--text);
+    border: 1px solid var(--border); border-radius: 10px; padding: 12px;
+  }
+  input:focus, select:focus { outline: 2px solid var(--accent); outline-offset: 0; }
+  button.go {
+    background: linear-gradient(135deg, var(--accent), var(--accent-2));
+    color: white; border: 0; border-radius: 10px; padding: 12px 20px;
+    font-weight: 600; cursor: pointer;
+  }
+  button.go:disabled { opacity: 0.5; cursor: default; }
+  .hint { color: var(--muted); font-size: 13px; margin-top: 12px; }
+  .steps { margin-top: 24px; display: grid; gap: 14px; }
+  .step {
+    background: var(--panel); border: 1px solid var(--border);
+    border-radius: 12px; padding: 16px 18px; opacity: 0; transform: translateY(6px);
+    animation: rise .35s ease forwards;
+  }
+  @keyframes rise { to { opacity: 1; transform: none; } }
+  .step h3 { margin: 0 0 4px; font-size: 15px; }
+  .badges { display: flex; gap: 6px; margin: 6px 0 10px; flex-wrap: wrap; }
+  .badge {
+    font-size: 11px; padding: 2px 8px; border-radius: 999px;
+    background: var(--panel-2); border: 1px solid var(--border); color: var(--muted);
+  }
+  .badge.cache { color: var(--ok); border-color: rgba(56,211,159,.4); }
+  .step pre {
+    margin: 0; white-space: pre-wrap; word-wrap: break-word;
+    font: inherit; color: var(--text);
+  }
+  .pending { display: flex; align-items: center; gap: 10px; color: var(--muted); }
+  .spinner {
+    width: 16px; height: 16px; border-radius: 50%;
+    border: 2px solid var(--border); border-top-color: var(--accent);
+    animation: spin .8s linear infinite;
+  }
+  @keyframes spin { to { transform: rotate(360deg); } }
+  .done {
+    margin-top: 20px; padding: 14px 16px; border-radius: 12px;
+    background: rgba(56,211,159,.08); border: 1px solid rgba(56,211,159,.3);
+  }
+  .done code { color: var(--ok); }
+  .error {
+    margin-top: 20px; padding: 14px 16px; border-radius: 12px;
+    background: rgba(255,107,107,.08); border: 1px solid rgba(255,107,107,.3);
+    color: var(--err);
+  }
+</style>
+</head>
+<body>
+<div class="wrap">
+  <header>
+    <h1><span class="brand">REXO</span> Studio</h1>
+    <div class="sub">Describe a goal. Watch your AI pipeline build it, step by step.</div>
+  </header>
+
+  <div class="status" id="status"><span class="pill"><span class="dot"></span> checking providers…</span></div>
+
+  <div class="card">
+    <label for="topic">What do you want to create?</label>
+    <div class="row">
+      <input id="topic" type="text" placeholder="e.g. REST APIs, Photosynthesis, The French Revolution" />
+      <select id="lang" title="Output language">
+        <option value="en">English</option>
+        <option value="pt">Português</option>
+        <option value="es">Español</option>
+        <option value="fr">Français</option>
+      </select>
+      <button class="go" id="go">Generate</button>
+    </div>
+    <div class="hint">This runs the <b>text.generate</b> capability as a 4-step mini-lesson
+      (summary → objectives → slide outline → quiz). Re-running the same topic is served
+      from cache — free and instant.</div>
+  </div>
+
+  <div class="steps" id="steps"></div>
+  <div id="tail"></div>
+</div>
+
+<script>
+(function () {
+  var statusEl = document.getElementById('status');
+  var stepsEl = document.getElementById('steps');
+  var tailEl = document.getElementById('tail');
+  var goBtn = document.getElementById('go');
+  var topicEl = document.getElementById('topic');
+  var langEl = document.getElementById('lang');
+  var es = null;
+
+  fetch('/api/status').then(function (r) { return r.json(); }).then(function (s) {
+    var provs = (s && s.providers) || [];
+    if (provs.length === 0) {
+      statusEl.innerHTML = '<span class="pill"><span class="dot warn"></span> No AI provider found — install Claude Code, Codex, or Ollama, then reload</span>';
+      goBtn.disabled = true;
+    } else {
+      statusEl.innerHTML = '<span class="pill"><span class="dot ok"></span> AI ready</span>' +
+        provs.map(function (p) { return '<span class="pill">' + esc(p) + '</span>'; }).join('');
+    }
+  }).catch(function () {
+    statusEl.innerHTML = '<span class="pill"><span class="dot warn"></span> could not reach REXO</span>';
+  });
+
+  function esc(s) {
+    var d = document.createElement('div'); d.textContent = String(s == null ? '' : s);
+    return d.innerHTML;
+  }
+
+  function pending(text) {
+    var el = document.createElement('div');
+    el.className = 'step';
+    el.innerHTML = '<div class="pending"><span class="spinner"></span> ' + esc(text) + '</div>';
+    return el;
+  }
+
+  function run() {
+    var topic = topicEl.value.trim();
+    if (!topic) { topicEl.focus(); return; }
+    if (es) es.close();
+    stepsEl.innerHTML = '';
+    tailEl.innerHTML = '';
+    goBtn.disabled = true;
+
+    var waiting = pending('Thinking… the AI pipeline is starting');
+    stepsEl.appendChild(waiting);
+
+    var url = '/api/demo?topic=' + encodeURIComponent(topic) + '&lang=' + encodeURIComponent(langEl.value);
+    es = new EventSource(url);
+
+    es.addEventListener('step', function (ev) {
+      if (waiting && waiting.parentNode) { waiting.parentNode.removeChild(waiting); waiting = null; }
+      var s = JSON.parse(ev.data);
+      var el = document.createElement('div');
+      el.className = 'step';
+      var badges = '<span class="badge">' + esc(s.Provider || 'ai') + '</span>';
+      if (s.Model) badges += '<span class="badge">' + esc(s.Model) + '</span>';
+      badges += s.CacheHit ? '<span class="badge cache">cached</span>'
+        : '<span class="badge">' + Math.round((s.DurationMS || 0) / 100) / 10 + 's</span>';
+      el.innerHTML = '<h3>' + esc(s.Title || s.ID) + '</h3><div class="badges">' + badges +
+        '</div><pre>' + esc((s.Text || '').trim()) + '</pre>';
+      stepsEl.appendChild(el);
+    });
+
+    es.addEventListener('done', function (ev) {
+      var d = JSON.parse(ev.data);
+      tailEl.innerHTML = '<div class="done">Done ✓ Saved to <code>' + esc(d.outputPath) + '</code>' +
+        (d.fullyCached ? ' &nbsp;·&nbsp; fully cache-served (0 model calls)' : '') + '</div>';
+      es.close(); goBtn.disabled = false;
+    });
+
+    es.addEventListener('error', function (ev) {
+      var msg = 'The run failed.';
+      try { msg = JSON.parse(ev.data).message || msg; } catch (e) {}
+      if (waiting && waiting.parentNode) { waiting.parentNode.removeChild(waiting); waiting = null; }
+      tailEl.innerHTML = '<div class="error">' + esc(msg) + '</div>';
+      es.close(); goBtn.disabled = false;
+    });
+  }
+
+  goBtn.addEventListener('click', run);
+  topicEl.addEventListener('keydown', function (e) { if (e.key === 'Enter') run(); });
+})();
+</script>
+</body>
+</html>

@@ -14,6 +14,7 @@ import (
 	"github.com/lanroo/rexo/internal/doctor"
 	"github.com/lanroo/rexo/internal/kernel"
 	"github.com/lanroo/rexo/internal/project"
+	"github.com/lanroo/rexo/internal/studio"
 	"github.com/lanroo/rexo/internal/workflow"
 )
 
@@ -43,6 +44,8 @@ func Run(args []string, stdout, stderr io.Writer, build BuildInfo) int {
 		return runRun(args[1:], stdout, stderr)
 	case "demo":
 		return runDemo(args[1:], stdout, stderr)
+	case "studio":
+		return runStudio(args[1:], stdout, stderr)
 	default:
 		fmt.Fprintf(stderr, "unknown command %q\n\n", args[0])
 		printHelp(stderr)
@@ -254,6 +257,32 @@ func runDemo(args []string, stdout, stderr io.Writer) int {
 	return 0
 }
 
+func runStudio(args []string, stdout, stderr io.Writer) int {
+	flags := flag.NewFlagSet("studio", flag.ContinueOnError)
+	flags.SetOutput(stderr)
+	projectDir := flags.String("project", ".", "project directory that holds .rexo")
+	port := flags.String("port", "4747", "port to serve the Studio UI on")
+	provider := flags.String("provider", "", "preferred provider: claude-code, codex, or ollama")
+	model := flags.String("model", "", "ollama model to use (default: autodetect)")
+	noOpen := flags.Bool("no-open", false, "do not open the browser automatically")
+	if err := flags.Parse(args); err != nil {
+		return 2
+	}
+
+	err := studio.Serve(studio.Options{
+		ProjectDir: *projectDir,
+		Addr:       "127.0.0.1:" + *port,
+		Provider:   *provider,
+		Model:      *model,
+		Open:       !*noOpen,
+	}, stdout)
+	if err != nil {
+		fmt.Fprintf(stderr, "studio: %v\n", err)
+		return 1
+	}
+	return 0
+}
+
 func printWelcome(w io.Writer, build BuildInfo) {
 	version := build.Version
 	if version == "" {
@@ -270,6 +299,7 @@ and safe, not a virus. You use REXO by typing a command below.
 
 Try one of these:
 
+  rexo studio              Open the visual Studio in your browser
   rexo demo "REST APIs"    Generate an AI mini-lesson (needs an AI CLI)
   rexo doctor              Check that your machine is ready
   rexo init my-project     Create a new REXO project
@@ -298,6 +328,7 @@ Commands:
   init      Create a new REXO project
   run       Execute a deterministic workflow (--replay verifies determinism)
   demo      Generate an AI mini-lesson on a topic (needs Claude Code, Codex, or Ollama)
+  studio    Open a local visual UI in your browser (describe a goal, watch it run)
   help      Show this help
 
 "rexo run" is deterministic and replayable. "rexo demo" calls a language model

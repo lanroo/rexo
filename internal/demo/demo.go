@@ -26,6 +26,9 @@ type Options struct {
 	Provider   string // preferred provider id (claude-code, codex, ollama); optional
 	Model      string // ollama model override; empty means autodetect
 	Lang       string // output language for every step; empty means English
+	// Progress, if set, is called after each step completes — used by the
+	// Studio UI to stream live progress.
+	Progress func(StepResult)
 }
 
 // StepResult is the outcome of one pipeline stage, including the Economy Engine
@@ -153,7 +156,7 @@ func Run(ctx context.Context, opt Options) (*Result, error) {
 		if !res.CacheHit {
 			result.FullyCached = false
 		}
-		result.Steps = append(result.Steps, StepResult{
+		sr := StepResult{
 			ID:         st.id,
 			Title:      st.title,
 			Provider:   res.Provider,
@@ -161,7 +164,11 @@ func Run(ctx context.Context, opt Options) (*Result, error) {
 			CacheHit:   res.CacheHit,
 			DurationMS: res.DurationMS,
 			Text:       out.Text,
-		})
+		}
+		result.Steps = append(result.Steps, sr)
+		if opt.Progress != nil {
+			opt.Progress(sr)
+		}
 	}
 
 	path, err := writeLesson(opt.ProjectDir, topic, result.Steps)
