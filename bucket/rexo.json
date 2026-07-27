@@ -1,12 +1,12 @@
 {
-    "version": "0.0.8",
+    "version": "0.0.9",
     "architecture": {
         "64bit": {
-            "url": "https://github.com/lanroo/rexo/releases/download/v0.0.8/rexo_windows_amd64.zip",
+            "url": "https://github.com/lanroo/rexo/releases/download/v0.0.9/rexo_windows_amd64.zip",
             "bin": [
                 "rexo.exe"
             ],
-            "hash": "cd3d53846230802c837ab4e9976cfee807aa98419605a7646dd851c41ee7b828"
+            "hash": "4df1fd80699fde3f0a3cd8699c314d087e73acda5de2546a905694e2dba5e78b"
         }
     },
     "homepage": "https://github.com/lanroo/rexo",
