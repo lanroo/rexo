@@ -99,8 +99,11 @@ cd my-first-project
 rexo run workflow.json
 ```
 
-It executes the example (build "hello world" → uppercase it to "HELLO WORLD"),
-writing outputs and a trace under `.rexo/runs/`.
+It runs the example workflow and writes a real file — **`welcome.md`** — that you
+can open, plus a full execution trace under `.rexo/runs/`.
+
+Want real AI instead of a deterministic demo? Try `rexo demo "REST APIs"` (uses
+your Claude Code, Codex, or Ollama CLI).
 
 > **macOS security note**: the first time, macOS may say the app is from an
 > unidentified developer. Right-click `rexo` → **Open** → **Open**, or go to

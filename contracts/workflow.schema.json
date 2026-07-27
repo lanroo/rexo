@@ -54,6 +54,14 @@
           }
         }
       }
+    },
+    "outputs": {
+      "type": "object",
+      "description": "Optional map of output file path (relative to the project) to the step id whose output is written there after a successful run.",
+      "additionalProperties": {
+        "type": "string",
+        "pattern": "^[a-z][a-z0-9-]*$"
+      }
     }
   }
 }

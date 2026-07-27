@@ -68,6 +68,11 @@
         }
       }
     },
+    "outputs": {
+      "type": "array",
+      "description": "Relative paths of files written from task outputs on a successful run.",
+      "items": { "type": "string" }
+    },
     "event_log": {
       "type": "string",
       "description": "Path, relative to the run directory, of the append-only JSONL event log for this run."

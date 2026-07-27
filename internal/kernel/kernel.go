@@ -14,6 +14,7 @@ import (
 	"io"
 	"os"
 	"path/filepath"
+	"sort"
 	"time"
 
 	"github.com/lanroo/rexo/internal/workflow"
@@ -75,6 +76,7 @@ type Trace struct {
 	StartedAt     string       `json:"started_at"`
 	EndedAt       string       `json:"ended_at,omitempty"`
 	Tasks         []TaskResult `json:"tasks"`
+	Outputs       []string     `json:"outputs,omitempty"`
 	EventLog      string       `json:"event_log,omitempty"`
 }
 
@@ -201,6 +203,18 @@ func Run(wf *workflow.Workflow, opt Options) (*Trace, error) {
 		appendEvent(events, now, "task_succeeded", map[string]any{"task": step.ID, "content_hash": manifest.ContentHash})
 	}
 
+	if runErr == nil && len(wf.Outputs) > 0 {
+		written, err := writeOutputs(opt.ProjectDir, wf.Outputs, outputs)
+		if err != nil {
+			runErr = err
+		} else {
+			trace.Outputs = written
+			for _, p := range written {
+				appendEvent(events, now, "output_written", map[string]any{"path": p})
+			}
+		}
+	}
+
 	if runErr != nil {
 		trace.Status = "failed"
 	} else {
@@ -277,19 +291,79 @@ func failTask(tr *TaskResult, now func() time.Time, err error) error {
 func resolveInputs(step workflow.Step, outputs map[string]string) (map[string]any, error) {
 	resolved := make(map[string]any, len(step.With))
 	for key, value := range step.With {
-		if ref, ok := value.(map[string]any); ok {
-			if from, ok := ref["from_task"].(string); ok {
-				out, ok := outputs[from]
-				if !ok {
-					return nil, fmt.Errorf("input %q references task %q which produced no output", key, from)
-				}
-				resolved[key] = out
-				continue
-			}
+		rv, err := resolveValue(value, outputs)
+		if err != nil {
+			return nil, fmt.Errorf("input %q: %w", key, err)
 		}
-		resolved[key] = value
+		resolved[key] = rv
 	}
 	return resolved, nil
+}
+
+// resolveValue replaces every { "from_task": "<id>" } reference anywhere in the
+// input tree with that task's output, so references work inside nested objects
+// (e.g. a template's vars) and arrays.
+func resolveValue(value any, outputs map[string]string) (any, error) {
+	switch v := value.(type) {
+	case map[string]any:
+		if from, ok := v["from_task"].(string); ok && len(v) == 1 {
+			out, ok := outputs[from]
+			if !ok {
+				return nil, fmt.Errorf("references task %q which produced no output", from)
+			}
+			return out, nil
+		}
+		m := make(map[string]any, len(v))
+		for k, val := range v {
+			rv, err := resolveValue(val, outputs)
+			if err != nil {
+				return nil, err
+			}
+			m[k] = rv
+		}
+		return m, nil
+	case []any:
+		arr := make([]any, len(v))
+		for i, val := range v {
+			rv, err := resolveValue(val, outputs)
+			if err != nil {
+				return nil, err
+			}
+			arr[i] = rv
+		}
+		return arr, nil
+	default:
+		return value, nil
+	}
+}
+
+// writeOutputs writes each declared output file (path -> task id) into the
+// project directory after a successful run, returning the paths in a stable
+// order.
+func writeOutputs(projectDir string, spec, outputs map[string]string) ([]string, error) {
+	paths := make([]string, 0, len(spec))
+	for path := range spec {
+		paths = append(paths, path)
+	}
+	sort.Strings(paths)
+
+	written := make([]string, 0, len(paths))
+	for _, path := range paths {
+		taskID := spec[path]
+		content, ok := outputs[taskID]
+		if !ok {
+			return written, fmt.Errorf("output %q references task %q which produced no output", path, taskID)
+		}
+		full := filepath.Join(projectDir, filepath.FromSlash(path))
+		if err := os.MkdirAll(filepath.Dir(full), 0o755); err != nil {
+			return written, fmt.Errorf("create output dir for %q: %w", path, err)
+		}
+		if err := os.WriteFile(full, []byte(content), 0o644); err != nil {
+			return written, fmt.Errorf("write output %q: %w", path, err)
+		}
+		written = append(written, path)
+	}
+	return written, nil
 }
 
 func inputsFingerprint(capability string, inputs map[string]any) string {

@@ -112,3 +112,46 @@ func TestRunUnknownCapabilityIsDiagnosable(t *testing.T) {
 		t.Fatalf("trace not persisted: %v", err)
 	}
 }
+
+func TestRunWritesNamedOutputWithTemplate(t *testing.T) {
+	dir := t.TempDir()
+	wf := &workflow.Workflow{
+		SchemaVersion: "0.1.0",
+		ID:            "welcome",
+		Version:       "0.1.0",
+		Steps: []workflow.Step{
+			{ID: "shout", Capability: "text.uppercase", Needs: []string{}, With: map[string]any{"text": "hi"}},
+			{
+				ID:         "doc",
+				Capability: "text.template",
+				Needs:      []string{"shout"},
+				With: map[string]any{
+					"template": "value: {{v}}",
+					// reference nested inside vars — exercises recursive resolution
+					"vars": map[string]any{"v": map[string]any{"from_task": "shout"}},
+				},
+			},
+		},
+		Outputs: map[string]string{"out/welcome.md": "doc"},
+	}
+	opt := Options{ProjectDir: dir, RunID: "run-outfixed001", Now: fixedNow()}
+
+	trace, err := Run(wf, opt)
+	if err != nil {
+		t.Fatalf("Run() error = %v", err)
+	}
+	if trace.Status != "succeeded" {
+		t.Fatalf("status = %q, want succeeded", trace.Status)
+	}
+	if len(trace.Outputs) != 1 || trace.Outputs[0] != "out/welcome.md" {
+		t.Fatalf("outputs = %v, want [out/welcome.md]", trace.Outputs)
+	}
+
+	content, err := os.ReadFile(filepath.Join(dir, "out", "welcome.md"))
+	if err != nil {
+		t.Fatal(err)
+	}
+	if string(content) != "value: HI" {
+		t.Fatalf("welcome.md = %q, want %q", content, "value: HI")
+	}
+}

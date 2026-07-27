@@ -174,6 +174,9 @@ func runRun(args []string, stdout, stderr io.Writer) int {
 	}
 
 	fmt.Fprintf(stdout, "Run %s: %s (%d task(s))\n", trace.RunID, trace.Status, len(trace.Tasks))
+	for _, path := range trace.Outputs {
+		fmt.Fprintf(stdout, "  wrote:     %s\n", filepath.Join(*projectDir, filepath.FromSlash(path)))
+	}
 	fmt.Fprintf(stdout, "  trace:     %s\n", filepath.Join(*projectDir, ".rexo", "runs", trace.RunID, "trace.json"))
 	fmt.Fprintf(stdout, "  artifacts: %s\n", filepath.Join(*projectDir, ".rexo", "artifacts"))
 	fmt.Fprintf(stdout, "Replay to verify: rexo run %s --replay %s\n", flags.Arg(0), trace.RunID)

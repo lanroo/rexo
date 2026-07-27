@@ -22,6 +22,9 @@ type Workflow struct {
 	ID            string `json:"id"`
 	Version       string `json:"version"`
 	Steps         []Step `json:"steps"`
+	// Outputs maps a file path (relative to the project) to the step id whose
+	// output is written there after a successful run.
+	Outputs map[string]string `json:"outputs,omitempty"`
 }
 
 // Load reads and parses a workflow definition from disk.
@@ -68,6 +71,11 @@ func (w *Workflow) validate() error {
 			if need == s.ID {
 				return fmt.Errorf("step %q cannot depend on itself", s.ID)
 			}
+		}
+	}
+	for path, taskID := range w.Outputs {
+		if !seen[taskID] {
+			return fmt.Errorf("output %q references unknown step %q", path, taskID)
 		}
 	}
 	return nil

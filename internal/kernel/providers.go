@@ -2,6 +2,7 @@ package kernel
 
 import (
 	"fmt"
+	"sort"
 	"strings"
 )
 
@@ -14,6 +15,7 @@ var providers = map[string]Provider{
 	"text.constant":  textConstant,
 	"text.uppercase": textUppercase,
 	"text.concat":    textConcat,
+	"text.template":  textTemplate,
 }
 
 // Capabilities returns the registered capability names (for diagnostics).
@@ -56,4 +58,23 @@ func textConcat(inputs map[string]any) (string, error) {
 	}
 	sep, _ := inputs["separator"].(string)
 	return strings.Join(parts, sep), nil
+}
+
+func textTemplate(inputs map[string]any) (string, error) {
+	tmpl, ok := inputs["template"].(string)
+	if !ok {
+		return "", fmt.Errorf("text.template requires a string input %q", "template")
+	}
+	result := tmpl
+	if vars, ok := inputs["vars"].(map[string]any); ok {
+		keys := make([]string, 0, len(vars))
+		for k := range vars {
+			keys = append(keys, k)
+		}
+		sort.Strings(keys) 
+		for _, k := range keys {
+			result = strings.ReplaceAll(result, "{{"+k+"}}", fmt.Sprintf("%v", vars[k]))
+		}
+	}
+	return result, nil
 }
