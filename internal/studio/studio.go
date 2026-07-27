@@ -11,13 +11,16 @@ import (
 	"io"
 	"net"
 	"net/http"
+	"os"
+	"path/filepath"
+	"strings"
 
 	"github.com/lanroo/rexo/internal/demo"
 	"github.com/lanroo/rexo/internal/pipeline"
 	"github.com/lanroo/rexo/internal/providers"
 )
 
-//go:embed index.html
+//go:embed index.html templates/catalog.json
 var assets embed.FS
 
 // Options configures the Studio server.
@@ -54,6 +57,55 @@ func Serve(opt Options, stdout io.Writer) error {
 			"ollamaModels": providers.OllamaModels(),
 			"capabilities": []string{"text.generate"},
 		})
+	})
+
+	mux.HandleFunc("/api/templates", func(w http.ResponseWriter, r *http.Request) {
+		switch r.Method {
+		case http.MethodGet:
+			built, err := builtinTemplates()
+			if err != nil {
+				http.Error(w, err.Error(), http.StatusInternalServerError)
+				return
+			}
+			all := append(built, loadUserTemplates()...)
+			writeJSON(w, map[string]any{"templates": all})
+		case http.MethodPost:
+			var t map[string]any
+			if err := json.NewDecoder(r.Body).Decode(&t); err != nil {
+				http.Error(w, "bad request", http.StatusBadRequest)
+				return
+			}
+			name, _ := t["name"].(string)
+			steps, _ := t["steps"].([]any)
+			if strings.TrimSpace(name) == "" || len(steps) == 0 {
+				http.Error(w, "template needs a name and at least one step", http.StatusBadRequest)
+				return
+			}
+			id, _ := t["id"].(string)
+			if strings.TrimSpace(id) == "" {
+				id = name
+			}
+			id = safeID(id)
+			dir := userTemplatesDir()
+			if dir == "" {
+				http.Error(w, "cannot resolve home directory", http.StatusInternalServerError)
+				return
+			}
+			if err := os.MkdirAll(dir, 0o755); err != nil {
+				http.Error(w, err.Error(), http.StatusInternalServerError)
+				return
+			}
+			t["id"] = id
+			t["source"] = "user"
+			data, _ := json.MarshalIndent(t, "", "  ")
+			if err := os.WriteFile(filepath.Join(dir, id+".json"), data, 0o644); err != nil {
+				http.Error(w, err.Error(), http.StatusInternalServerError)
+				return
+			}
+			writeJSON(w, map[string]any{"ok": true, "id": id})
+		default:
+			http.Error(w, "GET or POST", http.StatusMethodNotAllowed)
+		}
 	})
 
 	mux.HandleFunc("/api/demo", func(w http.ResponseWriter, r *http.Request) {
@@ -170,4 +222,86 @@ func Serve(opt Options, stdout io.Writer) error {
 func writeJSON(w http.ResponseWriter, v any) {
 	w.Header().Set("Content-Type", "application/json")
 	_ = json.NewEncoder(w).Encode(v)
+}
+
+// builtinTemplates reads the curated catalog embedded in the binary and tags
+// each entry as built-in so the UI can distinguish it from a user's own.
+func builtinTemplates() ([]map[string]any, error) {
+	data, err := assets.ReadFile("templates/catalog.json")
+	if err != nil {
+		return nil, err
+	}
+	var list []map[string]any
+	if err := json.Unmarshal(data, &list); err != nil {
+		return nil, err
+	}
+	for _, t := range list {
+		t["source"] = "built-in"
+	}
+	return list, nil
+}
+
+// userTemplatesDir is where imported/saved templates live, next to the rest of
+// REXO's user state. Empty if the home directory cannot be resolved.
+func userTemplatesDir() string {
+	home, err := os.UserHomeDir()
+	if err != nil {
+		return ""
+	}
+	return filepath.Join(home, ".rexo", "templates")
+}
+
+// loadUserTemplates reads every *.json template the user has imported or saved.
+// Unreadable or malformed files are skipped rather than failing the catalog.
+func loadUserTemplates() []map[string]any {
+	dir := userTemplatesDir()
+	if dir == "" {
+		return nil
+	}
+	entries, err := os.ReadDir(dir)
+	if err != nil {
+		return nil
+	}
+	var out []map[string]any
+	for _, e := range entries {
+		if e.IsDir() || !strings.EqualFold(filepath.Ext(e.Name()), ".json") {
+			continue
+		}
+		data, err := os.ReadFile(filepath.Join(dir, e.Name()))
+		if err != nil {
+			continue
+		}
+		var t map[string]any
+		if json.Unmarshal(data, &t) != nil {
+			continue
+		}
+		t["source"] = "user"
+		out = append(out, t)
+	}
+	return out
+}
+
+// safeID reduces an arbitrary string to a filename-safe slug ([a-z0-9-]). This
+// also prevents path traversal when a saved template becomes <id>.json.
+func safeID(s string) string {
+	s = strings.ToLower(strings.TrimSpace(s))
+	var b strings.Builder
+	dash := false
+	for _, r := range s {
+		if (r >= 'a' && r <= 'z') || (r >= '0' && r <= '9') {
+			b.WriteRune(r)
+			dash = false
+		} else if !dash {
+			b.WriteByte('-')
+			dash = true
+		}
+	}
+	out := strings.Trim(b.String(), "-")
+	if out == "" {
+		out = "template"
+	}
+	if len(out) > 60 {
+		out = strings.Trim(out[:60], "-")
+	}
+	return out
 }

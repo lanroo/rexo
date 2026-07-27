@@ -6,200 +6,371 @@
 <title>REXO Studio</title>
 <style>
   :root {
-    --bg: #090b11; --bg-2: #0d1017; --panel: #12161f; --panel-2: #171c28;
-    --border: #212838; --border-strong: #33405a;
-    --text: #eef2f9; --muted: #9aa6bd; --faint: #6b7688;
-    --accent: #6d8bff; --accent-2: #a06bff; --accent-soft: rgba(109,139,255,.14);
-    --ok: #37d9a6; --warn: #ffbf5b; --err: #ff6f6f;
-    --r: 14px; --r-sm: 10px; --r-lg: 20px; --shadow: 0 10px 40px -12px rgba(0,0,0,.6);
+    --bg: #08090c; --bg-tint: #0b0e14;
+    --panel: #14171e; --panel-2: #0e1016; --panel-3: #1b1f28;
+    --border: #232732; --border-strong: #333949;
+    --text: #f5f7fb; --muted: #98a2b3; --faint: #5b6474;
+    --accent: #4f8cff; --accent-2: #7aa9ff; --accent-deep: #2f6be0;
+    --accent-soft: rgba(79,140,255,.15); --accent-glow: rgba(79,140,255,.45);
+    --ok: #34d399; --ok-soft: rgba(52,211,153,.14);
+    --warn: #fbbf24; --err: #f87171;
+    --r: 14px; --r-sm: 9px; --r-xs: 6px;
+    --shadow: 0 24px 70px -34px rgba(0,0,0,.9);
+    --grad: linear-gradient(135deg, #2f6be0 0%, #4f8cff 55%, #7aa9ff 100%);
   }
   * { box-sizing: border-box; }
-  html, body { margin: 0; }
+  html, body { margin: 0; height: 100%; }
   body {
     background:
-      radial-gradient(1100px 500px at 80% -10%, rgba(160,107,255,.10), transparent 60%),
-      radial-gradient(900px 500px at 0% 0%, rgba(109,139,255,.10), transparent 55%), var(--bg);
+      radial-gradient(1200px 620px at 78% -8%, rgba(79,140,255,.10), transparent 60%),
+      radial-gradient(900px 500px at -6% 4%, rgba(122,169,255,.06), transparent 55%),
+      var(--bg);
     color: var(--text); min-height: 100vh;
-    font: 15px/1.6 ui-sans-serif, -apple-system, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
-    -webkit-font-smoothing: antialiased;
+    font: 14px/1.55 Inter, ui-sans-serif, -apple-system, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+    -webkit-font-smoothing: antialiased; text-rendering: optimizeLegibility;
   }
-  .app { max-width: 940px; margin: 0 auto; padding: 22px 22px 90px; }
-  .bar { display: flex; align-items: center; gap: 12px; padding: 6px 0 26px; }
+  .app { max-width: 1520px; margin: 0 auto; padding: 22px 26px 26px; }
+
+  /* Topbar */
+  .topbar { display: flex; align-items: center; gap: 14px; padding: 4px 2px 24px; }
+  .brand { display: flex; align-items: center; gap: 11px; }
   .mark {
-    width: 34px; height: 34px; border-radius: 9px; flex: 0 0 auto;
-    background: linear-gradient(135deg, var(--accent), var(--accent-2));
-    display: grid; place-items: center; color: #fff; font-weight: 800; font-size: 18px;
-    box-shadow: 0 6px 18px -6px rgba(109,139,255,.6);
+    display: grid; place-items: center; width: 34px; height: 34px; border-radius: 10px;
+    background: var(--grad); color: #fff; font-weight: 800; font-size: 17px; letter-spacing: -.5px;
+    box-shadow: 0 8px 22px -8px var(--accent-glow), inset 0 1px 0 rgba(255,255,255,.25);
   }
-  .bar h1 { margin: 0; font-size: 18px; font-weight: 650; letter-spacing: -.2px; }
-  .bar h1 span { color: var(--muted); font-weight: 500; }
-  .bar .spacer { flex: 1; }
-  .provs { display: flex; gap: 6px; flex-wrap: wrap; justify-content: flex-end; }
+  .brand .name { font-size: 19px; line-height: 1; font-weight: 700; letter-spacing: -.3px; }
+  .brand .wordmark { color: var(--muted); font-weight: 500; }
+  .topbar .spacer { flex: 1; }
+  .provs { display: flex; gap: 7px; flex-wrap: wrap; justify-content: flex-end; }
   .pill {
-    display: inline-flex; align-items: center; gap: 6px; font-size: 12px; color: var(--muted);
-    background: var(--panel); border: 1px solid var(--border); border-radius: 999px; padding: 4px 10px;
+    display: inline-flex; align-items: center; gap: 7px; font-size: 12px; font-weight: 500; color: var(--text);
+    background: linear-gradient(180deg, rgba(255,255,255,.03), transparent), var(--panel);
+    border: 1px solid var(--border); border-radius: 999px; padding: 5px 12px;
   }
   .dot { width: 7px; height: 7px; border-radius: 50%; background: var(--faint); }
-  .dot.ok { background: var(--ok); box-shadow: 0 0 0 3px rgba(55,217,166,.15); }
-  .dot.warn { background: var(--warn); }
+  .dot.ok { background: var(--ok); box-shadow: 0 0 0 3px var(--ok-soft); }
+  .dot.warn { background: var(--warn); box-shadow: 0 0 0 3px rgba(251,191,36,.14); }
 
-  .hero {
-    background: linear-gradient(180deg, var(--panel), var(--bg-2));
-    border: 1px solid var(--border); border-radius: var(--r-lg); padding: 26px; box-shadow: var(--shadow);
+  /* Grid + columns */
+  .grid { display: grid; grid-template-columns: minmax(250px, .92fr) minmax(350px, 1.16fr) minmax(320px, 1.02fr); gap: 18px; align-items: stretch; }
+  @media (max-width: 1080px) { .grid { grid-template-columns: 1fr; } }
+  .col {
+    background: linear-gradient(180deg, rgba(255,255,255,.018), transparent 120px), var(--panel);
+    border: 1px solid var(--border); border-radius: var(--r); box-shadow: var(--shadow);
+    display: flex; flex-direction: column; min-height: 620px;
   }
-  .hero .eyebrow { color: var(--muted); font-size: 13px; margin: 0 0 14px; }
-  .hero .eyebrow b { color: var(--text); }
-  label { display: block; font-size: 12px; color: var(--muted); margin-bottom: 6px; }
-  .qbox {
-    display: flex; align-items: center; gap: 10px; background: var(--panel-2);
-    border: 1px solid var(--border-strong); border-radius: var(--r); padding: 4px 4px 4px 16px;
-    transition: border-color .15s, box-shadow .15s;
-  }
-  .qbox:focus-within { border-color: var(--accent); box-shadow: 0 0 0 4px var(--accent-soft); }
-  .qbox input {
-    flex: 1; min-width: 0; background: none; border: 0; color: var(--text);
-    font: inherit; font-size: 17px; padding: 12px 0; outline: none;
-  }
-  .qbox input::placeholder { color: var(--faint); }
-  button.go {
-    border: 0; border-radius: var(--r-sm); cursor: pointer; font: inherit; font-weight: 650;
-    color: #fff; padding: 12px 22px; height: 46px; white-space: nowrap;
-    background: linear-gradient(135deg, var(--accent), var(--accent-2));
-    box-shadow: 0 8px 20px -8px rgba(109,139,255,.7); transition: transform .1s, opacity .15s;
-  }
-  button.go:hover:not(:disabled) { transform: translateY(-1px); }
-  button.go:disabled { opacity: .5; cursor: default; box-shadow: none; }
-  .controls { display: flex; gap: 14px; flex-wrap: wrap; margin-top: 16px; }
-  .controls .field { flex: 1 1 160px; min-width: 140px; }
+  .col > .ch { display: flex; align-items: center; gap: 10px; padding: 18px 20px 14px; border-bottom: 1px solid var(--border); }
+  .col > .ch h2 { margin: 0; font-size: 15px; font-weight: 650; letter-spacing: -.1px; }
+  .col > .ch .ktag { font-size: 10px; font-weight: 700; letter-spacing: .8px; text-transform: uppercase; color: var(--faint); }
+  .col > .ch .spacer { flex: 1; }
+  .col > .body { padding: 16px 20px 20px; overflow: auto; overflow-x: hidden; flex: 1; }
+
+  label { display: block; font-size: 12px; font-weight: 500; color: var(--muted); margin-bottom: 8px; letter-spacing: .1px; }
   select, textarea, input.text {
     width: 100%; background: var(--panel-2); color: var(--text); font: inherit;
-    border: 1px solid var(--border-strong); border-radius: var(--r-sm); padding: 11px 12px;
-    outline: none; transition: border-color .15s, box-shadow .15s;
+    border: 1px solid var(--border); border-radius: var(--r-sm); padding: 11px 13px; outline: none;
+    transition: border-color .15s, box-shadow .15s, background .15s;
   }
-  select:focus, textarea:focus, input.text:focus { border-color: var(--accent); box-shadow: 0 0 0 4px var(--accent-soft); }
-  textarea { resize: vertical; min-height: 66px; line-height: 1.5; }
+  select { appearance: none; background-image: linear-gradient(45deg, transparent 50%, var(--muted) 50%), linear-gradient(135deg, var(--muted) 50%, transparent 50%); background-position: right 15px center, right 10px center; background-size: 5px 5px, 5px 5px; background-repeat: no-repeat; padding-right: 32px; cursor: pointer; }
+  select:hover { border-color: var(--border-strong); }
+  select:focus, textarea:focus, input.text:focus { border-color: var(--accent); box-shadow: 0 0 0 4px var(--accent-soft); background: var(--panel); }
+  textarea { resize: vertical; line-height: 1.5; }
 
-  /* Pipeline editor */
-  .pl-head { display: flex; align-items: center; gap: 12px; margin: 24px 0 12px; }
-  .pl-head .t { font-size: 13px; color: var(--muted); font-weight: 600; letter-spacing: .3px; text-transform: uppercase; }
-  .pl-head .spacer { flex: 1; }
-  .mini {
-    background: var(--panel-2); border: 1px solid var(--border-strong); color: var(--text);
-    border-radius: 8px; padding: 8px 12px; font: inherit; font-size: 13px; cursor: pointer;
-  }
-  .mini:hover { border-color: var(--accent); }
-  .editor { display: grid; gap: 12px; }
+  /* Pipeline column */
+  .presetrow { margin-bottom: 20px; }
+  .plsteps { display: grid; gap: 11px; }
   .estep {
-    background: var(--panel); border: 1px solid var(--border); border-radius: var(--r); padding: 14px 16px;
+    position: relative; background: var(--panel-2); border: 1px solid var(--border); border-radius: var(--r-sm);
+    padding: 13px 14px; transition: border-color .15s, transform .12s, box-shadow .15s;
   }
-  .estep .top { display: flex; align-items: center; gap: 10px; margin-bottom: 8px; }
+  .estep:hover { border-color: var(--border-strong); }
+  .estep.running { border-color: var(--accent); box-shadow: 0 0 0 4px var(--accent-soft); }
+  .estep.done { border-color: rgba(52,211,153,.4); }
+  .estep .top { display: flex; align-items: center; gap: 11px; min-width: 0; }
+  .estep .dot2 { display: none; }
   .estep .num {
-    width: 22px; height: 22px; border-radius: 6px; background: var(--accent-soft); color: var(--accent);
-    display: grid; place-items: center; font-size: 12px; font-weight: 700; flex: 0 0 auto;
+    display: grid; place-items: center; width: 22px; height: 22px; flex: 0 0 auto; border-radius: 7px;
+    color: var(--accent-2); font-size: 12px; font-weight: 700; background: var(--accent-soft); border: 1px solid rgba(79,140,255,.22);
   }
-  .estep .titleIn { flex: 1; }
-  .estep .tok { font-size: 11px; color: var(--faint); font-family: ui-monospace, monospace; white-space: nowrap; }
-  .estep .rm { background: none; border: 0; color: var(--faint); cursor: pointer; font-size: 16px; padding: 2px 6px; border-radius: 6px; }
-  .estep .rm:hover { color: var(--err); background: rgba(255,111,111,.1); }
-  .editor-hint { color: var(--faint); font-size: 12px; margin-top: 10px; }
-  .editor-hint code { background: var(--panel-2); border: 1px solid var(--border); border-radius: 5px; padding: 0 4px; }
-
-  /* Pipeline stepper (live) */
-  .pipe { display: flex; align-items: center; margin: 30px 2px 6px; flex-wrap: wrap; row-gap: 14px; }
-  .node { display: flex; flex-direction: column; align-items: center; gap: 8px; flex: 0 0 auto; min-width: 74px; padding: 0 4px; }
-  .node .ring {
-    width: 30px; height: 30px; border-radius: 50%; display: grid; place-items: center;
-    border: 2px solid var(--border-strong); color: var(--faint); font-size: 13px; font-weight: 700;
-    background: var(--panel); transition: all .3s;
+  .estep.done .num { color: var(--ok); background: var(--ok-soft); border-color: rgba(52,211,153,.3); }
+  .estep .titleIn { flex: 1 1 auto; width: 0; background: none; border: 0; color: var(--text); font: inherit; font-size: 14px; font-weight: 500; padding: 3px 0; outline: none; min-width: 0; }
+  .estep .titleIn::placeholder { color: var(--faint); }
+  .estep .tok { display: none; }
+  .step-actions { display: flex; align-items: center; gap: 9px; flex: 0 0 auto; }
+  /* Toggle — decorative "enabled" indicator, on by default (matches Stitch) */
+  .toggle {
+    width: 34px; height: 19px; border-radius: 999px; border: 0; position: relative; flex: 0 0 auto;
+    background: var(--grad); box-shadow: inset 0 1px 2px rgba(0,0,0,.3), 0 0 0 1px rgba(79,140,255,.3);
+    cursor: pointer; transition: background .15s;
   }
-  .node .lbl { font-size: 11px; color: var(--faint); text-align: center; max-width: 84px; transition: color .3s; }
-  .node.active .ring { border-color: var(--accent); color: var(--accent); box-shadow: 0 0 0 5px var(--accent-soft); animation: pulse 1.4s infinite; }
-  .node.active .lbl { color: var(--text); }
-  .node.done .ring { border-color: var(--ok); background: var(--ok); color: #06231a; }
-  .link { flex: 1 1 20px; min-width: 16px; height: 2px; background: var(--border); }
-  .link.filled { background: linear-gradient(90deg, var(--ok), var(--accent)); }
-  @keyframes pulse { 0%,100% { box-shadow: 0 0 0 5px var(--accent-soft); } 50% { box-shadow: 0 0 0 9px rgba(109,139,255,.05); } }
+  .toggle::after { content: ""; position: absolute; width: 15px; height: 15px; border-radius: 50%; right: 2px; top: 2px; background: #fff; box-shadow: 0 1px 3px rgba(0,0,0,.4); transition: right .16s; }
+  .toggle.off { background: #2a2f3a; box-shadow: inset 0 1px 2px rgba(0,0,0,.4); }
+  .toggle.off::after { right: 17px; background: #7d8698; }
+  .iconbtn { background: none; border: 0; color: var(--faint); cursor: pointer; padding: 4px; border-radius: var(--r-xs); font-size: 15px; line-height: 1; transition: color .12s, background .12s; }
+  .iconbtn:hover { color: var(--text); background: var(--panel-3); }
+  .iconbtn.rm:hover { color: var(--err); background: rgba(248,113,113,.13); }
+  .estep .prompt { margin-top: 12px; }
+  .estep textarea { min-height: 74px; font-size: 12px; margin-top: 2px; }
+  .addstep { width: 100%; margin-top: 16px; background: transparent; border: 1px dashed var(--border-strong); color: var(--muted); border-radius: var(--r-sm); padding: 12px; cursor: pointer; font: inherit; font-size: 13px; font-weight: 500; transition: border-color .15s, color .15s, background .15s; }
+  .addstep:hover { border-color: var(--accent); color: var(--accent-2); background: var(--accent-soft); }
 
-  .steps { margin-top: 22px; display: grid; gap: 16px; }
-  .card { background: var(--panel); border: 1px solid var(--border); border-radius: var(--r); padding: 18px 20px; opacity: 0; transform: translateY(8px); animation: rise .4s ease forwards; }
+  /* Command column */
+  .cmdfields { display: grid; grid-template-columns: 1fr 1fr; gap: 13px; }
+  .cmdfields .full { grid-column: 1 / -1; }
+  .banner {
+    height: 116px; border-radius: var(--r-sm); margin: 20px 0 18px; overflow: hidden; position: relative;
+    background: radial-gradient(120% 140% at 50% 0%, rgba(79,140,255,.16), transparent 60%), var(--panel-2);
+    border: 1px solid var(--border);
+  }
+  .banner::before, .banner::after {
+    content: ""; position: absolute; left: 6%; right: 6%; top: 24%; bottom: 22%;
+    background:
+      linear-gradient(21deg, transparent 0 36%, rgba(122,169,255,.6) 37%, transparent 38% 100%),
+      linear-gradient(-18deg, transparent 0 42%, rgba(79,140,255,.5) 43%, transparent 44% 100%),
+      repeating-linear-gradient(108deg, transparent 0 14px, rgba(150,185,255,.32) 15px 16px, transparent 17px 27px);
+    transform: skewY(-4deg); filter: drop-shadow(0 0 14px rgba(79,140,255,.3)); opacity: .55;
+  }
+  .banner::after { transform: skewY(7deg) scaleX(.9); opacity: .34; filter: blur(.5px); }
+  .banner .tag { position: absolute; left: 13px; bottom: 9px; color: var(--muted); font-size: 10px; font-weight: 600; letter-spacing: .4px; opacity: .85; }
+  .goalwrap { margin-top: 14px; position: relative; }
+  .goalwrap textarea { min-height: 158px; padding: 16px 116px 54px 16px; border-color: var(--border); font-size: 15px; background: var(--panel-2); }
+  button.go {
+    position: absolute; right: 13px; bottom: 13px; border: 0; border-radius: var(--r-sm); cursor: pointer;
+    font: inherit; font-size: 14px; font-weight: 650; color: #fff; padding: 11px 22px;
+    background: var(--grad); box-shadow: 0 10px 26px -10px var(--accent-glow), inset 0 1px 0 rgba(255,255,255,.25);
+    transition: transform .1s, box-shadow .15s, opacity .15s;
+  }
+  button.go:hover:not(:disabled) { transform: translateY(-1px); box-shadow: 0 14px 30px -10px var(--accent-glow), inset 0 1px 0 rgba(255,255,255,.25); }
+  button.go:disabled { opacity: .45; cursor: default; box-shadow: none; }
+
+  /* Live Stream column */
+  .card {
+    background: linear-gradient(180deg, rgba(255,255,255,.02), transparent 90px), var(--panel-2);
+    border: 1px solid var(--border); border-radius: var(--r-sm); padding: 15px 17px; margin-bottom: 13px;
+    opacity: 0; transform: translateY(8px); animation: rise .4s ease forwards;
+  }
   @keyframes rise { to { opacity: 1; transform: none; } }
-  .card .head { display: flex; align-items: center; gap: 10px; margin-bottom: 10px; }
-  .card .head h3 { margin: 0; font-size: 15.5px; font-weight: 650; flex: 1; }
-  .badges { display: flex; gap: 6px; flex-wrap: wrap; }
-  .badge { font-size: 11px; padding: 2px 8px; border-radius: 999px; color: var(--muted); background: var(--panel-2); border: 1px solid var(--border); }
-  .badge.cache { color: var(--ok); border-color: rgba(55,217,166,.4); }
-  .copy { background: none; border: 1px solid var(--border); color: var(--muted); cursor: pointer; border-radius: 8px; padding: 4px 9px; font-size: 12px; }
+  .card .head { display: flex; align-items: center; gap: 9px; margin-bottom: 4px; }
+  .card .head h3 { margin: 0; font-size: 15px; font-weight: 650; flex: 1; letter-spacing: -.1px; }
+  .badges { display: flex; gap: 6px; flex-wrap: wrap; margin: 10px 0 14px; }
+  .badge { font-size: 11px; font-weight: 600; padding: 3px 9px; border-radius: 999px; color: var(--muted); background: var(--panel-3); border: 1px solid var(--border); }
+  .badge.cache { color: var(--ok); background: var(--ok-soft); border-color: rgba(52,211,153,.4); }
+  .copy { background: none; border: 1px solid var(--border); color: var(--muted); cursor: pointer; border-radius: var(--r-xs); padding: 6px 10px; font: inherit; font-size: 12px; font-weight: 500; transition: border-color .15s, color .15s; }
   .copy:hover { border-color: var(--accent); color: var(--text); }
-  .md { color: #dfe6f2; } .md h3,.md h4,.md h5 { margin: 14px 0 6px; color: var(--text); font-size: 14.5px; }
-  .md p { margin: 8px 0; } .md ol,.md ul { margin: 8px 0; padding-left: 22px; } .md li { margin: 4px 0; }
-  .md code { background: var(--panel-2); border: 1px solid var(--border); border-radius: 6px; padding: 1px 5px; font-size: 13px; } .md strong { color: #fff; }
-
-  .pending { display: flex; align-items: center; gap: 12px; color: var(--muted); padding: 6px 2px; }
-  .spinner { width: 18px; height: 18px; border-radius: 50%; border: 2px solid var(--border-strong); border-top-color: var(--accent); animation: spin .8s linear infinite; }
+  .md { color: #c3cad6; font-size: 13px; line-height: 1.62; }
+  .md h3, .md h4, .md h5 { margin: 16px 0 7px; color: var(--text); font-size: 16px; font-weight: 650; letter-spacing: -.1px; }
+  .md p { margin: 10px 0; } .md ol, .md ul { margin: 10px 0; padding-left: 22px; } .md li { margin: 7px 0; }
+  .md code { background: var(--panel-3); border: 1px solid var(--border); border-radius: 5px; padding: 1px 5px; font-size: 12.5px; color: var(--accent-2); } .md strong { color: #fff; font-weight: 650; }
+  .empty { color: var(--faint); font-size: 13px; line-height: 1.7; text-align: center; padding: 84px 16px; }
+  .pending { display: flex; align-items: center; gap: 11px; color: var(--muted); padding: 4px; font-weight: 500; }
+  .spinner { width: 17px; height: 17px; border-radius: 50%; border: 2px solid var(--border-strong); border-top-color: var(--accent); animation: spin .8s linear infinite; }
   @keyframes spin { to { transform: rotate(360deg); } }
+  .errbox { color: var(--err); background: rgba(248,113,113,.08); border: 1px solid rgba(248,113,113,.3); border-radius: var(--r-sm); padding: 13px 15px; white-space: pre-wrap; font-size: 13px; }
 
-  .summary { margin-top: 22px; border-radius: var(--r); padding: 16px 18px; background: linear-gradient(180deg, rgba(55,217,166,.09), rgba(55,217,166,.03)); border: 1px solid rgba(55,217,166,.28); display: flex; align-items: center; gap: 20px; flex-wrap: wrap; }
-  .summary .stat { display: flex; flex-direction: column; } .summary .stat .k { font-size: 18px; font-weight: 700; } .summary .stat .v { font-size: 11.5px; color: var(--muted); }
-  .summary .grow { flex: 1; } .summary code { color: var(--ok); font-size: 12.5px; word-break: break-all; }
-  .btn-ghost { background: none; border: 1px solid rgba(55,217,166,.4); color: var(--ok); cursor: pointer; border-radius: 9px; padding: 9px 14px; font: inherit; font-weight: 600; }
-  .btn-ghost:hover { background: rgba(55,217,166,.12); }
-  .error { margin-top: 22px; padding: 15px 18px; border-radius: var(--r); color: var(--err); background: rgba(255,111,111,.08); border: 1px solid rgba(255,111,111,.3); white-space: pre-wrap; }
-  footer { color: var(--faint); font-size: 12px; text-align: center; margin-top: 40px; }
+  /* Status bar */
+  .statusbar {
+    margin-top: 18px; padding: 14px 18px; display: flex; align-items: center; gap: 24px; flex-wrap: wrap;
+    background: linear-gradient(180deg, rgba(255,255,255,.015), transparent), var(--panel);
+    border: 1px solid var(--border); border-radius: var(--r);
+  }
+  .statusbar .item { font-size: 12px; color: var(--muted); } .statusbar .item b { color: var(--text); font-weight: 650; }
+  .statusbar .item + .item { border-left: 1px solid var(--border); padding-left: 24px; }
+  .statusbar code { color: var(--accent-2); font-size: 11.5px; }
+  .statusbar .spacer { flex: 1; }
+  .btn-ghost { background: none; border: 1px solid var(--border-strong); color: var(--muted); cursor: pointer; border-radius: var(--r-sm); padding: 8px 12px; font: inherit; font-size: 12px; font-weight: 500; transition: border-color .15s, color .15s, background .15s; }
+  .btn-ghost:hover:not(:disabled) { border-color: var(--accent); color: var(--text); background: var(--accent-soft); }
+  .btn-ghost:disabled { opacity: .4; cursor: default; }
+
+  @media (max-width: 640px) {
+    .app { padding: 14px; }
+    .topbar { padding-bottom: 16px; flex-wrap: wrap; }
+    .provs { width: 100%; justify-content: flex-start; }
+    .grid { gap: 13px; }
+    .col { min-height: auto; }
+    .cmdfields { grid-template-columns: 1fr; }
+    .goalwrap textarea { min-height: 150px; }
+    .statusbar { gap: 12px; }
+    .statusbar .item { width: 100%; }
+    .statusbar .item + .item { border-left: 0; padding-left: 0; }
+  }
   [hidden] { display: none !important; }
+
+  /* Template library toolbar */
+  .libbar { display: flex; gap: 8px; margin-bottom: 18px; }
+  .libbtn { flex: 0 0 auto; background: var(--panel-2); border: 1px solid var(--border); color: var(--muted); border-radius: var(--r-sm); padding: 9px 13px; font: inherit; font-size: 12.5px; font-weight: 550; cursor: pointer; transition: border-color .15s, color .15s, background .15s; }
+  .libbtn:hover { border-color: var(--border-strong); color: var(--text); }
+  .libbtn.primary { flex: 1 1 auto; color: var(--text); border-color: rgba(79,140,255,.4); background: var(--accent-soft); }
+  .libbtn.primary:hover { border-color: var(--accent); background: rgba(79,140,255,.2); }
+
+  /* Modal */
+  .modal { position: fixed; inset: 0; z-index: 50; display: grid; place-items: center; padding: 4vh 4vw; }
+  .modal-backdrop { position: absolute; inset: 0; background: rgba(4,6,10,.72); backdrop-filter: blur(3px); }
+  .modal-card {
+    position: relative; width: 100%; max-width: 940px; max-height: 92vh; display: flex; flex-direction: column;
+    background: var(--panel); border: 1px solid var(--border-strong); border-radius: var(--r); box-shadow: 0 40px 120px -40px #000;
+    animation: rise .28s ease;
+  }
+  .modal-head { display: flex; align-items: center; gap: 12px; padding: 18px 22px; border-bottom: 1px solid var(--border); }
+  .modal-title { font-size: 17px; font-weight: 700; letter-spacing: -.2px; }
+  .lib-count { color: var(--faint); font-size: 12px; font-weight: 500; margin-left: 4px; }
+  .modal-x { margin-left: auto; font-size: 22px; }
+  .lib-controls { display: flex; gap: 10px; padding: 16px 22px 12px; }
+  .lib-search { flex: 1; }
+  .lib-diff { width: 150px; flex: 0 0 auto; }
+  .lib-cats { display: flex; flex-wrap: wrap; gap: 7px; padding: 4px 22px 14px; border-bottom: 1px solid var(--border); }
+  .chip { font-size: 12px; font-weight: 550; color: var(--muted); background: var(--panel-2); border: 1px solid var(--border); border-radius: 999px; padding: 6px 12px; cursor: pointer; transition: all .13s; }
+  .chip:hover { border-color: var(--border-strong); color: var(--text); }
+  .chip.active { color: #fff; background: var(--accent-soft); border-color: var(--accent); }
+  .lib-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 12px; padding: 18px 22px 22px; overflow: auto; }
+  @media (max-width: 680px) { .lib-grid { grid-template-columns: 1fr; } .lib-controls { flex-wrap: wrap; } .lib-diff { width: 100%; } }
+  .tplcard { display: flex; flex-direction: column; background: var(--panel-2); border: 1px solid var(--border); border-radius: var(--r-sm); padding: 15px 16px; transition: border-color .14s, transform .12s; }
+  .tplcard:hover { border-color: var(--border-strong); transform: translateY(-1px); }
+  .tplcard .tname { display: flex; align-items: center; gap: 8px; font-size: 14.5px; font-weight: 650; letter-spacing: -.1px; }
+  .tplcard .src { font-size: 9.5px; font-weight: 700; letter-spacing: .5px; text-transform: uppercase; color: var(--accent-2); background: var(--accent-soft); border: 1px solid rgba(79,140,255,.25); border-radius: 5px; padding: 1px 5px; }
+  .tplcard .src.user { color: var(--ok); background: var(--ok-soft); border-color: rgba(52,211,153,.3); }
+  .tplcard .tdesc { color: var(--muted); font-size: 12.5px; line-height: 1.5; margin: 8px 0 12px; flex: 1; }
+  .tplcard .tmeta { display: flex; align-items: center; gap: 7px; flex-wrap: wrap; margin-bottom: 13px; }
+  .tplcard .tcat { font-size: 11px; color: var(--muted); }
+  .tplcard .tdiff { font-size: 10.5px; font-weight: 650; padding: 2px 8px; border-radius: 999px; text-transform: capitalize; }
+  .tdiff.easy { color: var(--ok); background: var(--ok-soft); } .tdiff.medium { color: var(--warn); background: rgba(251,191,36,.12); } .tdiff.hard { color: var(--err); background: rgba(248,113,113,.12); }
+  .tplcard .tsteps { color: var(--faint); font-size: 11px; }
+  .tplcard .tuse { background: var(--grad); border: 0; color: #fff; font: inherit; font-size: 12.5px; font-weight: 600; border-radius: var(--r-xs); padding: 8px 14px; cursor: pointer; align-self: flex-start; box-shadow: 0 6px 16px -8px var(--accent-glow); transition: transform .1s; }
+  .tplcard .tuse:hover { transform: translateY(-1px); }
+  .lib-empty { padding: 60px 22px; text-align: center; color: var(--faint); font-size: 13px; }
+
+  /* Discover templates gallery */
+  .discover { margin-top: 34px; }
+  .disc-head { display: flex; align-items: flex-end; gap: 16px; margin-bottom: 18px; }
+  .disc-title { margin: 0; font-size: 24px; font-weight: 750; letter-spacing: -.5px; }
+  .disc-sub { margin: 5px 0 0; color: var(--muted); font-size: 13.5px; }
+  .disc-head .btn-ghost { margin-left: auto; }
+  .disc-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 16px; }
+  @media (max-width: 1080px) { .disc-grid { grid-template-columns: repeat(2, 1fr); } }
+  @media (max-width: 560px) { .disc-grid { grid-template-columns: 1fr; } }
+  .disc-card { cursor: pointer; border-radius: var(--r); overflow: hidden; background: transparent; transition: transform .14s; }
+  .disc-card:hover { transform: translateY(-3px); }
+  .disc-preview {
+    position: relative; aspect-ratio: 16 / 10; border-radius: var(--r); overflow: hidden;
+    border: 1px solid var(--border); display: flex; align-items: center; justify-content: center; padding: 16px;
+  }
+  .disc-card:hover .disc-preview { border-color: var(--border-strong); box-shadow: var(--shadow); }
+  .disc-cat { position: absolute; top: 11px; left: 12px; font-size: 10px; font-weight: 700; letter-spacing: .5px; text-transform: uppercase; color: #fff; background: rgba(0,0,0,.28); border: 1px solid rgba(255,255,255,.18); border-radius: 6px; padding: 3px 8px; backdrop-filter: blur(4px); }
+  .disc-diff { position: absolute; top: 11px; right: 12px; font-size: 10px; font-weight: 700; text-transform: capitalize; color: #fff; background: rgba(0,0,0,.28); border: 1px solid rgba(255,255,255,.18); border-radius: 6px; padding: 3px 8px; backdrop-filter: blur(4px); }
+  /* Pipeline flow preview — the steps as connected chips */
+  .disc-flow { display: flex; align-items: center; gap: 0; flex-wrap: wrap; justify-content: center; max-width: 100%; }
+  .disc-step { font-size: 11px; font-weight: 600; color: #fff; background: rgba(255,255,255,.16); border: 1px solid rgba(255,255,255,.28); border-radius: 7px; padding: 5px 9px; white-space: nowrap; box-shadow: 0 2px 8px rgba(0,0,0,.2); }
+  .disc-arrow { color: rgba(255,255,255,.7); font-size: 12px; margin: 0 5px; }
+  .disc-name { margin: 12px 2px 3px; font-size: 14.5px; font-weight: 650; letter-spacing: -.1px; }
+  .disc-desc { margin: 0 2px; color: var(--muted); font-size: 12.5px; line-height: 1.45; }
 </style>
 </head>
 <body>
 <div class="app">
-  <div class="bar">
-    <div class="mark">R</div>
-    <h1>REXO <span>Studio</span></h1>
+  <div class="topbar">
+    <div class="brand"><div class="mark">R</div><div class="name">REXO <span class="wordmark">Studio</span></div></div>
     <div class="spacer"></div>
     <div class="provs" id="provs"><span class="pill"><span class="dot"></span> checking…</span></div>
   </div>
 
-  <div class="hero">
-    <p class="eyebrow">Describe a goal, pick or compose a <b>pipeline of AI steps</b>, and watch it run.</p>
-    <label for="topic">What do you want to create?</label>
-    <div class="qbox">
-      <input id="topic" type="text" placeholder="e.g. React, a blog post about coffee, the water cycle" autocomplete="off" />
-      <button class="go" id="go">Run</button>
-    </div>
-    <div class="controls">
-      <div class="field"><label for="provider">AI provider</label><select id="provider"></select></div>
-      <div class="field" id="modelField" hidden><label for="model">Model</label><select id="model"></select></div>
-      <div class="field"><label for="lang">Language</label>
-        <select id="lang"><option value="en">English</option><option value="pt">Português</option><option value="es">Español</option><option value="fr">Français</option></select>
+  <div class="grid">
+    <!-- Pipeline -->
+    <section class="col">
+      <div class="ch"><h2>Pipeline</h2><div class="spacer"></div><span class="ktag" id="tplName"></span></div>
+      <div class="body">
+        <div class="libbar">
+          <button class="libbtn primary" id="openLib">Browse Library</button>
+          <button class="libbtn" id="importBtn" title="Import a template (.json)">Import</button>
+          <button class="libbtn" id="exportBtn" title="Export current pipeline as a template">Export</button>
+        </div>
+        <div class="plsteps" id="editor"></div>
+        <button class="addstep" id="addStep">＋ Add step</button>
       </div>
-    </div>
+    </section>
 
-    <div class="pl-head">
-      <span class="t">Pipeline</span>
-      <div class="spacer"></div>
-      <select class="mini" id="preset" style="width:auto">
-        <option value="mini-lesson">Preset: Mini-lesson</option>
-        <option value="blog-post">Preset: Blog post</option>
-        <option value="explainer">Preset: Explainer</option>
-      </select>
-      <button class="mini" id="addStep">＋ Add step</button>
-    </div>
-    <div class="editor" id="editor"></div>
-    <div class="editor-hint">Each step is an AI call. In a prompt, use <code>{{topic}}</code> for the goal and
-      <code>{{step-id}}</code> to inject an earlier step's output (the id is shown on each step).</div>
+    <!-- Command -->
+    <section class="col">
+      <div class="ch"><h2>Command</h2></div>
+      <div class="body">
+        <div class="cmdfields">
+          <div><label for="provider">AI provider</label><select id="provider"></select></div>
+          <div><label for="model">Model</label><select id="model" disabled><option>Auto</option></select></div>
+          <div class="full" id="langWrap"><label for="lang">Output language</label>
+            <select id="lang"><option value="en">English</option><option value="pt">Português</option><option value="es">Español</option><option value="fr">Français</option></select>
+          </div>
+        </div>
+        <div class="banner"><span class="tag">REXO · text.generate@1</span></div>
+        <label for="topic">What do you want to create?</label>
+        <div class="goalwrap">
+          <textarea id="topic" placeholder="e.g. React, a blog post about specialty coffee, the water cycle"></textarea>
+          <button class="go" id="go">Run</button>
+        </div>
+      </div>
+    </section>
+
+    <!-- Live Stream -->
+    <section class="col">
+      <div class="ch"><h2>Live Stream</h2><div class="spacer"></div><button class="copy" id="fs">⛶ Fullscreen</button></div>
+      <div class="body" id="stream"><div class="empty">Compose a pipeline, type a goal, and hit Run.<br/>The output streams here, step by step.</div></div>
+    </section>
   </div>
 
-  <div class="pipe" id="pipe" hidden></div>
-  <div class="steps" id="steps"></div>
-  <div id="tail"></div>
-  <footer>REXO · Runtime for Execution &amp; eXchange Orchestration</footer>
+  <div class="statusbar">
+    <div class="item">Total Time: <b id="stTime">—</b></div>
+    <div class="item">Cache Hits: <b id="stCache">—</b></div>
+    <div class="item">File Path: <code id="stFile">—</code></div>
+    <div class="spacer"></div>
+    <button class="btn-ghost" id="dl" disabled>⇩ Download .md</button>
+  </div>
+
+  <!-- Discover templates -->
+  <section class="discover">
+    <div class="disc-head">
+      <div>
+        <h2 class="disc-title">Discover templates</h2>
+        <p class="disc-sub">Start your next pipeline with a ready-made template.</p>
+      </div>
+      <button class="btn-ghost" id="discAll">View all</button>
+    </div>
+    <div class="disc-grid" id="discGrid"></div>
+  </section>
+</div>
+
+<!-- Template Library -->
+<div class="modal" id="libModal" hidden>
+  <div class="modal-backdrop" id="libClose1"></div>
+  <div class="modal-card">
+    <div class="modal-head">
+      <div class="modal-title">Template Library <span class="lib-count" id="libCount"></span></div>
+      <button class="iconbtn modal-x" id="libClose2" title="Close">×</button>
+    </div>
+    <div class="lib-controls">
+      <input class="text lib-search" id="libSearch" placeholder="Search templates — name, tag, or area…" />
+      <select id="libDiff" class="lib-diff">
+        <option value="">All levels</option>
+        <option value="easy">Easy</option>
+        <option value="medium">Medium</option>
+        <option value="hard">Hard</option>
+      </select>
+    </div>
+    <div class="lib-cats" id="libCats"></div>
+    <div class="lib-grid" id="libGrid"></div>
+    <div class="lib-empty" id="libEmpty" hidden>No templates match your search.</div>
+  </div>
+</div>
+<input type="file" id="importFile" accept="application/json,.json" hidden />
 </div>
 
 <script>
 (function () {
   var $ = function (id) { return document.getElementById(id); };
-  var provsEl = $('provs'), pipeEl = $('pipe'), stepsEl = $('steps'), tailEl = $('tail');
-  var goBtn = $('go'), topicEl = $('topic'), langEl = $('lang');
-  var providerEl = $('provider'), modelEl = $('model'), modelField = $('modelField');
-  var editorEl = $('editor'), presetEl = $('preset'), addStepBtn = $('addStep');
+  var provsEl = $('provs'), editorEl = $('editor'), addStepBtn = $('addStep');
+  var openLibBtn = $('openLib'), importBtn = $('importBtn'), exportBtn = $('exportBtn'), importFile = $('importFile');
+  var libModal = $('libModal'), libGrid = $('libGrid'), libSearch = $('libSearch'), libDiff = $('libDiff'), libCats = $('libCats'), libCount = $('libCount'), libEmpty = $('libEmpty'), tplNameEl = $('tplName');
+  var discGrid = $('discGrid'), discAllBtn = $('discAll');
+  var providerEl = $('provider'), modelEl = $('model'), langEl = $('lang');
+  var topicEl = $('topic'), goBtn = $('go'), streamEl = $('stream');
+  var stTime = $('stTime'), stCache = $('stCache'), stFile = $('stFile'), dlBtn = $('dl'), fsBtn = $('fs');
 
   var PRESETS = {
     'mini-lesson': [
@@ -224,13 +395,13 @@
 
   function esc(s) { var d = document.createElement('div'); d.textContent = String(s == null ? '' : s); return d.innerHTML; }
   function slug(s) { return String(s || '').toLowerCase().trim().replace(/[^a-z0-9]+/g, '-').replace(/^-|-$/g, ''); }
-  function fill(sel, values, auto) {
-    sel.innerHTML = ''; if (auto) { var a = document.createElement('option'); a.value = ''; a.textContent = auto; sel.appendChild(a); }
-    values.forEach(function (v) { var o = document.createElement('option'); o.value = v; o.textContent = v; sel.appendChild(o); });
-  }
+  function fill(sel, values, auto) { sel.innerHTML = ''; if (auto) { var a = document.createElement('option'); a.value = ''; a.textContent = auto; sel.appendChild(a); } values.forEach(function (v) { var o = document.createElement('option'); o.value = v; o.textContent = v; sel.appendChild(o); }); }
   function isOllama(p) { return p === 'ollama' || p === 'ollama-api'; }
-  function syncModel() { modelField.hidden = !(isOllama(providerEl.value) && ollamaModels.length > 0); }
-
+  function syncModel() {
+    var on = isOllama(providerEl.value) && ollamaModels.length > 0;
+    modelEl.disabled = !on;
+    if (on) fill(modelEl, ollamaModels, ''); else { modelEl.innerHTML = '<option>Auto</option>'; }
+  }
   function md(src) {
     var out = '', inList = false, tag = '';
     function inline(s) { return esc(s).replace(/\*\*([^*]+)\*\*/g, '<strong>$1</strong>').replace(/`([^`]+)`/g, '<code>$1</code>'); }
@@ -249,114 +420,241 @@
 
   // ---- Pipeline editor ----
   function stepCard(step, i) {
-    var el = document.createElement('div');
-    el.className = 'estep';
+    var el = document.createElement('div'); el.className = 'estep';
     el.innerHTML =
-      '<div class="top"><span class="num">' + (i + 1) + '</span>' +
-      '<input class="text titleIn" placeholder="Step title" />' +
-      '<span class="tok"></span><button class="rm" title="Remove">✕</button></div>' +
-      '<textarea class="promptIn" placeholder="Prompt — use {{topic}} and {{earlier-step}}"></textarea>';
+      '<div class="top"><span class="dot2"></span><span class="num"></span>' +
+      '<input class="titleIn" placeholder="Step title" /><span class="tok"></span>' +
+      '<div class="step-actions"><span class="toggle" aria-hidden="true"></span><button class="iconbtn edit" title="Edit prompt">⚙</button><button class="iconbtn rm" title="Remove">×</button></div></div>' +
+      '<div class="prompt" hidden><textarea class="promptIn" placeholder="Prompt — use {{topic}} and {{earlier-step}}"></textarea></div>';
     el.querySelector('.titleIn').value = step.title || '';
     el.querySelector('.promptIn').value = step.prompt || '';
     el._system = step.system || '';
     var tok = el.querySelector('.tok');
-    function refreshTok() { var id = slug(el.querySelector('.titleIn').value) || 'step' + (i + 1); tok.textContent = '{{' + id + '}}'; }
+    function refreshTok() { tok.textContent = '{{' + (slug(el.querySelector('.titleIn').value) || ('step' + (i + 1))) + '}}'; }
     refreshTok();
     el.querySelector('.titleIn').addEventListener('input', refreshTok);
+    el.querySelector('.edit').addEventListener('click', function () { el.querySelector('.prompt').hidden = !el.querySelector('.prompt').hidden; });
     el.querySelector('.rm').addEventListener('click', function () { el.remove(); renumber(); });
     return el;
   }
-  function renumber() { Array.prototype.forEach.call(editorEl.children, function (el, i) { el.querySelector('.num').textContent = i + 1; }); }
-  function renderEditor(steps) { editorEl.innerHTML = ''; steps.forEach(function (s, i) { editorEl.appendChild(stepCard(s, i)); }); }
+  function renumber() { Array.prototype.forEach.call(editorEl.children, function (el, i) { el.querySelector('.num').textContent = (i + 1) + '.'; }); }
+  function renderEditor(steps) { editorEl.innerHTML = ''; steps.forEach(function (s, i) { editorEl.appendChild(stepCard(s, i)); }); renumber(); }
+  function stepEls() { return Array.prototype.slice.call(editorEl.children); }
   function getSteps() {
     var used = {};
-    return Array.prototype.map.call(editorEl.children, function (el, i) {
+    return stepEls().map(function (el, i) {
       var title = el.querySelector('.titleIn').value.trim();
       var id = slug(title) || 'step' + (i + 1);
       while (used[id]) { id = id + '-' + (i + 1); } used[id] = true;
       return { id: id, title: title || id, system: el._system || '', prompt: el.querySelector('.promptIn').value };
     });
   }
+  addStepBtn.addEventListener('click', function () { var el = stepCard({ title: '', prompt: '' }, editorEl.children.length); editorEl.appendChild(el); renumber(); el.querySelector('.prompt').hidden = false; el.querySelector('.titleIn').focus(); });
 
-  presetEl.addEventListener('change', function () { renderEditor(PRESETS[presetEl.value] || []); });
-  addStepBtn.addEventListener('click', function () { editorEl.appendChild(stepCard({ title: '', prompt: '' }, editorEl.children.length)); });
-  renderEditor(PRESETS['mini-lesson']);
+  // ---- Template Library ----
+  var templates = [], activeCat = 'All';
+
+  function loadTemplate(t) {
+    renderEditor((t.steps || []).map(function (s) { return { title: s.title || '', system: s.system || '', prompt: s.prompt || '' }; }));
+    tplNameEl.textContent = t.name || '';
+  }
+  function categories() {
+    var seen = {}, cats = [];
+    templates.forEach(function (t) { var c = t.category || 'Other'; if (!seen[c]) { seen[c] = 1; cats.push(c); } });
+    cats.sort();
+    return ['All'].concat(cats);
+  }
+  function renderCats() {
+    libCats.innerHTML = '';
+    categories().forEach(function (c) {
+      var b = document.createElement('button'); b.className = 'chip' + (c === activeCat ? ' active' : ''); b.textContent = c;
+      b.addEventListener('click', function () { activeCat = c; renderCats(); renderGrid(); });
+      libCats.appendChild(b);
+    });
+  }
+  function matches(t) {
+    if (activeCat !== 'All' && (t.category || 'Other') !== activeCat) return false;
+    if (libDiff.value && (t.difficulty || '') !== libDiff.value) return false;
+    var q = libSearch.value.trim().toLowerCase();
+    if (!q) return true;
+    var hay = [t.name, t.description, t.category, (t.tags || []).join(' ')].join(' ').toLowerCase();
+    return hay.indexOf(q) !== -1;
+  }
+  function tplCard(t) {
+    var el = document.createElement('div'); el.className = 'tplcard';
+    var n = (t.steps || []).length;
+    var src = t.source === 'user' ? '<span class="src user">yours</span>' : '<span class="src">built-in</span>';
+    var diff = t.difficulty ? '<span class="tdiff ' + esc(t.difficulty) + '">' + esc(t.difficulty) + '</span>' : '';
+    el.innerHTML =
+      '<div class="tname">' + esc(t.name || 'Untitled') + src + '</div>' +
+      '<div class="tdesc">' + esc(t.description || '') + '</div>' +
+      '<div class="tmeta"><span class="tcat">' + esc(t.category || 'Other') + '</span>' + diff +
+      '<span class="tsteps">' + n + ' step' + (n === 1 ? '' : 's') + '</span></div>' +
+      '<button class="tuse">Use this</button>';
+    el.querySelector('.tuse').addEventListener('click', function () { loadTemplate(t); closeLib(); });
+    return el;
+  }
+  function renderGrid() {
+    var list = templates.filter(matches);
+    libGrid.innerHTML = '';
+    list.forEach(function (t) { libGrid.appendChild(tplCard(t)); });
+    libEmpty.hidden = list.length > 0;
+    libCount.textContent = list.length + ' of ' + templates.length;
+  }
+  function openLib() { libModal.hidden = false; renderCats(); renderGrid(); libSearch.focus(); }
+  function closeLib() { libModal.hidden = true; }
+
+  // Category → gradient, so each discover card reads at a glance.
+  var CAT_GRAD = {
+    'IT & Dev': 'linear-gradient(135deg,#2f6be0,#4f8cff)',
+    'DevOps': 'linear-gradient(135deg,#0891b2,#22d3ee)',
+    'Data': 'linear-gradient(135deg,#7c3aed,#a78bfa)',
+    'Security': 'linear-gradient(135deg,#dc2626,#f87171)',
+    'Content': 'linear-gradient(135deg,#ea580c,#fb923c)',
+    'Education': 'linear-gradient(135deg,#059669,#34d399)',
+    'Business': 'linear-gradient(135deg,#4338ca,#818cf8)',
+    'Creative': 'linear-gradient(135deg,#db2777,#f472b6)',
+    '_default': 'linear-gradient(135deg,#334155,#64748b)'
+  };
+  function catGradient(c) { return CAT_GRAD[c] || CAT_GRAD._default; }
+
+  function discCard(t) {
+    var el = document.createElement('div'); el.className = 'disc-card';
+    var steps = (t.steps || []).slice(0, 4);
+    var flow = steps.map(function (s, i) {
+      return (i ? '<span class="disc-arrow">→</span>' : '') + '<span class="disc-step">' + esc(s.title || ('Step ' + (i + 1))) + '</span>';
+    }).join('');
+    var diff = t.difficulty ? '<span class="disc-diff">' + esc(t.difficulty) + '</span>' : '';
+    el.innerHTML =
+      '<div class="disc-preview" style="background:' + catGradient(t.category) + '">' +
+        '<span class="disc-cat">' + esc(t.category || 'Other') + '</span>' + diff +
+        '<div class="disc-flow">' + flow + '</div>' +
+      '</div>' +
+      '<div class="disc-name">' + esc(t.name || 'Untitled') + '</div>' +
+      '<div class="disc-desc">' + esc(t.description || '') + '</div>';
+    el.addEventListener('click', function () { loadTemplate(t); window.scrollTo({ top: 0, behavior: 'smooth' }); });
+    return el;
+  }
+  function renderDiscover() {
+    if (!discGrid) return;
+    discGrid.innerHTML = '';
+    templates.slice(0, 8).forEach(function (t) { discGrid.appendChild(discCard(t)); });
+  }
+
+  function applyTemplates(list, keepOpen) {
+    templates = list || [];
+    renderDiscover();
+    if (!libModal.hidden || keepOpen) { renderCats(); renderGrid(); }
+  }
+  function fetchTemplates(cb) {
+    fetch('/api/templates').then(function (r) { return r.json(); }).then(function (d) {
+      var list = (d && d.templates) || [];
+      if (list.length === 0) throw new Error('empty');
+      applyTemplates(list);
+      if (cb) cb();
+    }).catch(function () {
+      // offline / no backend: fall back to a built-in default so the editor still works
+      applyTemplates([{ id: 'mini-lesson', name: 'Mini-lesson', category: 'Education', difficulty: 'easy', description: 'Beginner lesson: summary, objectives, outline, quiz.', tags: [], steps: PRESETS['mini-lesson'], source: 'built-in' }]);
+      if (cb) cb();
+    });
+  }
+
+  openLibBtn.addEventListener('click', openLib);
+  discAllBtn.addEventListener('click', openLib);
+  $('libClose1').addEventListener('click', closeLib);
+  $('libClose2').addEventListener('click', closeLib);
+  document.addEventListener('keydown', function (e) { if (e.key === 'Escape' && !libModal.hidden) closeLib(); });
+  libSearch.addEventListener('input', renderGrid);
+  libDiff.addEventListener('change', renderGrid);
+
+  // Import: pick a .json file, save it to the user library, then refresh
+  importBtn.addEventListener('click', function () { importFile.click(); });
+  importFile.addEventListener('change', function () {
+    var f = importFile.files && importFile.files[0]; if (!f) return;
+    var reader = new FileReader();
+    reader.onload = function () {
+      var tpl; try { tpl = JSON.parse(reader.result); } catch (e) { alert('That file is not valid JSON.'); return; }
+      if (!tpl || !tpl.name || !(tpl.steps && tpl.steps.length)) { alert('A template needs a "name" and at least one step.'); return; }
+      fetch('/api/templates', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(tpl) })
+        .then(function (r) { if (!r.ok) throw new Error(); return r.json(); })
+        .then(function () { fetchTemplates(function () { if (libModal.hidden) openLib(); }); })
+        .catch(function () { alert('Could not save the template (is the Studio backend running?).'); });
+    };
+    reader.readAsText(f); importFile.value = '';
+  });
+
+  // Export: download the current pipeline as a template JSON
+  exportBtn.addEventListener('click', function () {
+    var steps = getSteps().map(function (s) { return { title: s.title, system: s.system, prompt: s.prompt }; });
+    if (steps.length === 0) { alert('Add at least one step to export.'); return; }
+    var name = prompt('Name this template:', tplNameEl.textContent || 'My pipeline'); if (name == null) return;
+    var tpl = { id: slug(name), name: name, description: '', category: 'Custom', difficulty: 'medium', tags: [], steps: steps };
+    var a = document.createElement('a'); a.href = URL.createObjectURL(new Blob([JSON.stringify(tpl, null, 2)], { type: 'application/json' }));
+    a.download = (slug(name) || 'template') + '.json'; a.click(); URL.revokeObjectURL(a.href);
+  });
+
+  // Initial load: fetch the catalog and populate the editor with a default
+  fetchTemplates(function () {
+    var def = templates.filter(function (t) { return t.id === 'mini-lesson'; })[0] || templates[0];
+    if (def) loadTemplate(def);
+  });
 
   // ---- Providers ----
   fetch('/api/status').then(function (r) { return r.json(); }).then(function (s) {
     var provs = (s && s.providers) || []; ollamaModels = (s && s.ollamaModels) || [];
-    if (provs.length === 0) {
-      provsEl.innerHTML = '<span class="pill"><span class="dot warn"></span> no AI provider — install Claude Code, Codex, or Ollama</span>';
-      goBtn.disabled = true; return;
-    }
-    provsEl.innerHTML = '<span class="pill"><span class="dot ok"></span> AI ready</span>' +
-      provs.map(function (p) { return '<span class="pill">' + esc(p) + '</span>'; }).join('');
-    fill(providerEl, provs, 'Auto (best available)'); fill(modelEl, ollamaModels, ''); syncModel();
-  }).catch(function () { provsEl.innerHTML = '<span class="pill"><span class="dot warn"></span> could not reach REXO</span>'; });
+    if (provs.length === 0) { provsEl.innerHTML = '<span class="pill"><span class="dot warn"></span> no AI provider</span>'; goBtn.disabled = true; return; }
+    provsEl.innerHTML = provs.map(function (p) { return '<span class="pill"><span class="dot ok"></span>' + esc(p) + '</span>'; }).join('');
+    fill(providerEl, provs, 'Auto (best available)'); syncModel();
+  }).catch(function () { provsEl.innerHTML = '<span class="pill"><span class="dot warn"></span> offline</span>'; });
   providerEl.addEventListener('change', syncModel);
 
-  // ---- Live pipeline viz ----
-  var runStages = [];
-  function renderPipe(doneCount) {
-    pipeEl.hidden = false; var html = '';
-    runStages.forEach(function (st, i) {
-      var done = i < doneCount, active = i === doneCount;
-      var cls = done ? 'done' : (active ? 'active' : '');
-      html += '<div class="node ' + cls + '"><div class="ring">' + (done ? '✓' : (i + 1)) + '</div><div class="lbl">' + esc(st) + '</div></div>';
-      if (i < runStages.length - 1) html += '<div class="link ' + (done ? 'filled' : '') + '"></div>';
-    });
-    pipeEl.innerHTML = html;
-  }
-
+  // ---- Run ----
+  function setStepState(i, state) { var el = stepEls()[i]; if (!el) return; el.classList.remove('running', 'done'); if (state) el.classList.add(state); }
   function stepCardResult(s) {
     var el = document.createElement('div'); el.className = 'card';
     var badges = '<span class="badge">' + esc(s.Provider || 'ai') + '</span>' +
       (s.Model ? '<span class="badge">' + esc(s.Model) + '</span>' : '') +
       (s.CacheHit ? '<span class="badge cache">cached</span>' : '<span class="badge">' + (Math.round((s.DurationMS || 0) / 100) / 10) + 's</span>');
     el.innerHTML = '<div class="head"><h3>' + esc(s.Title || s.ID) + '</h3><div class="badges">' + badges + '</div><button class="copy">Copy</button></div><div class="md">' + md(s.Text) + '</div>';
-    el.querySelector('.copy').addEventListener('click', function () {
-      if (navigator.clipboard) navigator.clipboard.writeText(String(s.Text || ''));
-      var b = this; b.textContent = 'Copied'; setTimeout(function () { b.textContent = 'Copy'; }, 1200);
-    });
+    el.querySelector('.copy').addEventListener('click', function () { if (navigator.clipboard) navigator.clipboard.writeText(String(s.Text || '')); var b = this; b.textContent = 'Copied'; setTimeout(function () { b.textContent = 'Copy'; }, 1200); });
     return el;
   }
 
   function run() {
     if (running) return;
     var topic = topicEl.value.trim(); if (!topic) { topicEl.focus(); return; }
-    var steps = getSteps();
-    if (steps.length === 0) { alert('Add at least one step to the pipeline.'); return; }
+    var steps = getSteps(); if (steps.length === 0) { alert('Add at least one step.'); return; }
 
-    running = true; goBtn.disabled = true;
-    stepsEl.innerHTML = ''; tailEl.innerHTML = ''; collected = []; startedAt = Date.now();
-    runStages = steps.map(function (s) { return s.title; }); renderPipe(0);
+    running = true; goBtn.disabled = true; collected = []; startedAt = Date.now();
+    streamEl.innerHTML = ''; stTime.textContent = '—'; stCache.textContent = '—'; stFile.textContent = '…'; dlBtn.disabled = true;
+    stepEls().forEach(function (_, i) { setStepState(i, ''); });
+    setStepState(0, 'running');
 
     var wait = document.createElement('div'); wait.className = 'card';
     wait.innerHTML = '<div class="pending"><span class="spinner"></span> Running the pipeline…</div>';
-    stepsEl.appendChild(wait);
+    streamEl.appendChild(wait);
 
-    var payload = { topic: topic, lang: langEl.value, provider: providerEl.value, model: (!modelField.hidden ? modelEl.value : ''), steps: steps };
+    var payload = { topic: topic, lang: langEl.value, provider: providerEl.value, model: (!modelEl.disabled ? modelEl.value : ''), steps: steps };
 
     function handle(msg) {
       if (msg.event === 'step') {
         if (wait && wait.parentNode) { wait.parentNode.removeChild(wait); wait = null; }
-        collected.push(msg.data); renderPipe(collected.length);
-        stepsEl.appendChild(stepCardResult(msg.data));
+        collected.push(msg.data);
+        setStepState(collected.length - 1, 'done');
+        setStepState(collected.length, 'running');
+        streamEl.appendChild(stepCardResult(msg.data));
+        streamEl.scrollTop = streamEl.scrollHeight;
       } else if (msg.event === 'done') {
-        renderPipe(runStages.length);
         var calls = collected.filter(function (c) { return !c.CacheHit; }).length, cached = collected.length - calls;
-        var secs = Math.round((Date.now() - startedAt) / 100) / 10;
-        var bar = document.createElement('div'); bar.className = 'summary';
-        bar.innerHTML = '<div class="stat"><span class="k">' + secs + 's</span><span class="v">total time</span></div>' +
-          '<div class="stat"><span class="k">' + calls + '</span><span class="v">model calls</span></div>' +
-          '<div class="stat"><span class="k">' + cached + '</span><span class="v">from cache</span></div>' +
-          '<div class="grow"><div class="v" style="color:var(--muted)">Saved to</div><code>' + esc(msg.data.outputPath) + '</code></div>' +
-          '<button class="btn-ghost" id="dl">Download .md</button>';
-        tailEl.appendChild(bar);
-        $('dl').addEventListener('click', function () { download(topic, collected); });
+        stTime.textContent = (Math.round((Date.now() - startedAt) / 100) / 10) + 's';
+        stCache.textContent = collected.length ? Math.round(cached / collected.length * 100) + '%' : '0%';
+        stFile.textContent = msg.data.outputPath || '—';
+        dlBtn.disabled = false; dlBtn.onclick = function () { download(topic, collected); };
       } else if (msg.event === 'error') {
         if (wait && wait.parentNode) { wait.parentNode.removeChild(wait); wait = null; }
-        tailEl.innerHTML = '<div class="error">' + esc((msg.data && msg.data.message) || 'The run failed.') + '</div>';
+        var e = document.createElement('div'); e.className = 'errbox'; e.textContent = (msg.data && msg.data.message) || 'The run failed.';
+        streamEl.appendChild(e);
+        stepEls().forEach(function (el) { el.classList.remove('running'); });
       }
     }
 
@@ -377,22 +675,25 @@
       })
       .catch(function (e) {
         if (wait && wait.parentNode) { wait.parentNode.removeChild(wait); wait = null; }
-        tailEl.innerHTML = '<div class="error">' + esc('Could not run: ' + e.message) + '</div>'; finish();
+        var box = document.createElement('div'); box.className = 'errbox'; box.textContent = 'Could not run: ' + e.message; streamEl.appendChild(box); finish();
       });
 
-    function finish() { running = false; goBtn.disabled = false; }
+    function finish() { running = false; goBtn.disabled = false; stepEls().forEach(function (el) { el.classList.remove('running'); }); }
   }
 
   function download(topic, steps) {
     var body = '# ' + topic + '\n\n';
     steps.forEach(function (s) { body += '## ' + (s.Title || s.ID) + '\n\n' + String(s.Text || '').trim() + '\n\n'; });
-    var a = document.createElement('a');
-    a.href = URL.createObjectURL(new Blob([body], { type: 'text/markdown' }));
+    var a = document.createElement('a'); a.href = URL.createObjectURL(new Blob([body], { type: 'text/markdown' }));
     a.download = (slug(topic) || 'output') + '.md'; a.click(); URL.revokeObjectURL(a.href);
   }
 
+  fsBtn.addEventListener('click', function () {
+    var col = streamEl.closest('.col');
+    if (!document.fullscreenElement) { col.requestFullscreen && col.requestFullscreen(); } else { document.exitFullscreen && document.exitFullscreen(); }
+  });
   goBtn.addEventListener('click', run);
-  topicEl.addEventListener('keydown', function (e) { if (e.key === 'Enter') run(); });
+  topicEl.addEventListener('keydown', function (e) { if (e.key === 'Enter' && (e.ctrlKey || e.metaKey)) { e.preventDefault(); run(); } });
 })();
 </script>
 </body>

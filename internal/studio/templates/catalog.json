@@ -1,0 +1,289 @@
+[
+  {
+    "id": "mini-lesson",
+    "name": "Mini-lesson",
+    "description": "Turn any topic into a beginner lesson: summary, objectives, slide outline, and a quiz.",
+    "category": "Education",
+    "difficulty": "easy",
+    "tags": ["teaching", "course", "learning", "quiz"],
+    "steps": [
+      { "title": "Summary", "system": "You are a concise technical educator.", "prompt": "Write a 3-sentence, plain-language summary of \"{{topic}}\" for a complete beginner. Output only the summary." },
+      { "title": "Objectives", "system": "You are an instructional designer.", "prompt": "Given this summary:\n\n{{summary}}\n\nWrite exactly 3 learning objectives for a short lesson on \"{{topic}}\". Output a numbered list and nothing else." },
+      { "title": "Outline", "system": "You are a curriculum designer.", "prompt": "Create a 5-slide outline for a lesson on \"{{topic}}\". Each slide: a title and a one-line description. Cover:\n\n{{objectives}}\n\nOutput a numbered list of 5 slides and nothing else." },
+      { "title": "Quiz", "system": "You are an assessment writer.", "prompt": "Write 1 multiple-choice question (4 options A-D) testing these objectives:\n\n{{objectives}}\n\nMark the correct option. Output only the question, its options, and the answer." }
+    ]
+  },
+  {
+    "id": "quiz-maker",
+    "name": "Quiz Maker",
+    "description": "Generate a 5-question multiple-choice quiz with an answer key on any topic.",
+    "category": "Education",
+    "difficulty": "easy",
+    "tags": ["quiz", "assessment", "teaching"],
+    "steps": [
+      { "title": "Key points", "system": "You are a subject-matter expert.", "prompt": "List the 5 most important facts a learner must know about \"{{topic}}\". Output a numbered list, one fact per line." },
+      { "title": "Quiz", "system": "You are an assessment writer who writes fair, unambiguous questions.", "prompt": "Using these key points:\n\n{{key-points}}\n\nWrite 5 multiple-choice questions (4 options A-D each) about \"{{topic}}\". Vary the difficulty. Output the questions only." },
+      { "title": "Answer key", "system": "You are a meticulous grader.", "prompt": "Give the answer key for this quiz, with a one-line explanation per answer:\n\n{{quiz}}" }
+    ]
+  },
+  {
+    "id": "study-guide",
+    "name": "Study Guide",
+    "description": "A structured study guide: overview, key concepts, worked example, and review questions.",
+    "category": "Education",
+    "difficulty": "medium",
+    "tags": ["study", "notes", "learning", "revision"],
+    "steps": [
+      { "title": "Overview", "system": "You are a patient tutor.", "prompt": "Write a one-paragraph overview of \"{{topic}}\" that motivates why it matters." },
+      { "title": "Key concepts", "system": "You are a tutor who defines terms crisply.", "prompt": "List and define the 6 key concepts of \"{{topic}}\". One bolded term + one-sentence definition each." },
+      { "title": "Worked example", "system": "You are a tutor who teaches by example.", "prompt": "Give one fully worked example that uses these concepts:\n\n{{key-concepts}}\n\nShow each step and explain it." },
+      { "title": "Review questions", "system": "You write questions that build recall.", "prompt": "Write 5 short-answer review questions on \"{{topic}}\" with a model answer for each." }
+    ]
+  },
+  {
+    "id": "code-review",
+    "name": "Code Review",
+    "description": "Review a snippet for bugs, then style/clarity, then concrete improvements.",
+    "category": "IT & Dev",
+    "difficulty": "medium",
+    "tags": ["code", "review", "quality", "refactor"],
+    "steps": [
+      { "title": "Correctness", "system": "You are a senior engineer reviewing code. Be specific and cite lines.", "prompt": "Review this code for correctness — bugs, edge cases, and failure modes:\n\n{{topic}}\n\nList each issue with its impact. If none, say so." },
+      { "title": "Style", "system": "You are a senior engineer who values readable, idiomatic code.", "prompt": "Now review the same code for readability, naming, and idiom. List concrete, actionable suggestions." },
+      { "title": "Improved version", "system": "You are a senior engineer. Output only code plus a short note.", "prompt": "Rewrite the code addressing the correctness and style findings:\n\nCorrectness:\n{{correctness}}\n\nStyle:\n{{style}}\n\nOutput the improved code and a 2-line summary of what changed." }
+    ]
+  },
+  {
+    "id": "unit-tests",
+    "name": "Unit Test Generator",
+    "description": "Identify the cases worth testing, then write the tests, then flag gaps.",
+    "category": "IT & Dev",
+    "difficulty": "medium",
+    "tags": ["testing", "code", "quality", "tdd"],
+    "steps": [
+      { "title": "Test plan", "system": "You are a test engineer who thinks in edge cases.", "prompt": "For this code or function, list the cases worth testing — happy path, edge cases, and error conditions:\n\n{{topic}}" },
+      { "title": "Tests", "system": "You write clean, runnable tests. Output only code.", "prompt": "Write unit tests covering this plan:\n\n{{test-plan}}\n\nUse the conventional test framework for the language. Output only the test code." },
+      { "title": "Coverage gaps", "system": "You are a critical reviewer.", "prompt": "What important cases are still NOT covered by these tests? Be concrete.\n\n{{tests}}" }
+    ]
+  },
+  {
+    "id": "regex-explainer",
+    "name": "Regex Explainer",
+    "description": "Explain a regular expression in plain English, with examples of what it matches.",
+    "category": "IT & Dev",
+    "difficulty": "easy",
+    "tags": ["regex", "code", "explain"],
+    "steps": [
+      { "title": "Breakdown", "system": "You explain regex token by token, clearly.", "prompt": "Explain this regular expression piece by piece in plain English:\n\n{{topic}}" },
+      { "title": "Examples", "system": "You are precise about matching.", "prompt": "Give 5 strings this regex matches and 5 it does not, based on:\n\n{{breakdown}}\n\nUse two short lists." },
+      { "title": "Safer version", "system": "You are a careful engineer.", "prompt": "Suggest one improvement or a common pitfall (e.g. catastrophic backtracking, anchoring) for this regex, with a fixed version." }
+    ]
+  },
+  {
+    "id": "api-design",
+    "name": "REST API Designer",
+    "description": "Design a REST resource: endpoints, request/response shapes, and error handling.",
+    "category": "IT & Dev",
+    "difficulty": "hard",
+    "tags": ["api", "rest", "backend", "design"],
+    "steps": [
+      { "title": "Resources", "system": "You are an API architect.", "prompt": "For the feature \"{{topic}}\", identify the core resources and their relationships. Output a short list." },
+      { "title": "Endpoints", "system": "You design clean, RESTful APIs.", "prompt": "Design the REST endpoints for these resources:\n\n{{resources}}\n\nFor each: method, path, purpose. Output a table-like list." },
+      { "title": "Schemas", "system": "You write precise JSON schemas.", "prompt": "Give example JSON request and response bodies for the main create and read endpoints from:\n\n{{endpoints}}" },
+      { "title": "Errors", "system": "You care about robust APIs.", "prompt": "List the error cases and the HTTP status + error body each should return, for this API." }
+    ]
+  },
+  {
+    "id": "bug-triage",
+    "name": "Bug Triage",
+    "description": "Turn a vague bug report into hypotheses, a repro plan, and next steps.",
+    "category": "IT & Dev",
+    "difficulty": "medium",
+    "tags": ["debugging", "bug", "support"],
+    "steps": [
+      { "title": "Clarify", "system": "You are a calm senior engineer.", "prompt": "Restate this bug report clearly and list what information is missing:\n\n{{topic}}" },
+      { "title": "Hypotheses", "system": "You reason about root causes systematically.", "prompt": "Given the report:\n\n{{clarify}}\n\nList the 3-5 most likely root causes, most probable first, with why." },
+      { "title": "Next steps", "system": "You give actionable debugging steps.", "prompt": "For the top hypotheses:\n\n{{hypotheses}}\n\nGive a concrete repro + investigation plan, step by step." }
+    ]
+  },
+  {
+    "id": "dockerfile",
+    "name": "Dockerfile Generator",
+    "description": "Produce a small, secure multi-stage Dockerfile with an explanation.",
+    "category": "DevOps",
+    "difficulty": "medium",
+    "tags": ["docker", "devops", "containers", "ci"],
+    "steps": [
+      { "title": "Assumptions", "system": "You are a DevOps engineer.", "prompt": "For containerizing \"{{topic}}\", state the runtime, build steps, and ports you'll assume. Keep it short." },
+      { "title": "Dockerfile", "system": "You write minimal, secure, multi-stage Dockerfiles. Output only the Dockerfile.", "prompt": "Write a production-ready multi-stage Dockerfile based on:\n\n{{assumptions}}\n\nUse a slim base, a non-root user, and layer caching well." },
+      { "title": "Notes", "system": "You explain your choices.", "prompt": "Explain the key decisions in this Dockerfile and one thing to watch out for:\n\n{{dockerfile}}" }
+    ]
+  },
+  {
+    "id": "ci-pipeline",
+    "name": "CI Pipeline Draft",
+    "description": "Draft a CI workflow: stages, jobs, and a starter config.",
+    "category": "DevOps",
+    "difficulty": "medium",
+    "tags": ["ci", "devops", "automation", "github-actions"],
+    "steps": [
+      { "title": "Stages", "system": "You are a CI/CD engineer.", "prompt": "For the project \"{{topic}}\", propose the CI stages (e.g. lint, test, build, release) and what each does." },
+      { "title": "Config", "system": "You write clean pipeline YAML. Output only YAML.", "prompt": "Write a starter GitHub Actions workflow implementing these stages:\n\n{{stages}}" },
+      { "title": "Hardening", "system": "You care about reliable pipelines.", "prompt": "Suggest 3 improvements (caching, matrix, permissions, secrets) for this workflow." }
+    ]
+  },
+  {
+    "id": "postmortem",
+    "name": "Incident Postmortem",
+    "description": "Structure a blameless postmortem: timeline, root cause, and action items.",
+    "category": "DevOps",
+    "difficulty": "medium",
+    "tags": ["incident", "sre", "postmortem", "reliability"],
+    "steps": [
+      { "title": "Timeline", "system": "You write clear, factual incident timelines.", "prompt": "From these incident notes, build a chronological timeline (time — event):\n\n{{topic}}" },
+      { "title": "Root cause", "system": "You do blameless root-cause analysis.", "prompt": "Based on the timeline:\n\n{{timeline}}\n\nIdentify the root cause and contributing factors. Focus on systems, not people." },
+      { "title": "Action items", "system": "You turn lessons into concrete fixes.", "prompt": "Write 3-5 action items to prevent recurrence, each with an owner-type and priority." }
+    ]
+  },
+  {
+    "id": "data-analysis-plan",
+    "name": "Data Analysis Plan",
+    "description": "Turn a question into a rigorous analysis plan before touching the data.",
+    "category": "Data",
+    "difficulty": "medium",
+    "tags": ["data", "analysis", "statistics", "research"],
+    "steps": [
+      { "title": "Questions", "system": "You are a data scientist who sharpens vague questions.", "prompt": "Turn this goal into 2-3 precise, answerable analytical questions:\n\n{{topic}}" },
+      { "title": "Method", "system": "You choose appropriate, honest methods.", "prompt": "For these questions:\n\n{{questions}}\n\nDescribe the data needed, the metrics, and the analysis method for each." },
+      { "title": "Pitfalls", "system": "You guard against bad conclusions.", "prompt": "List the biases and pitfalls to watch for in this analysis, and how to check for each." }
+    ]
+  },
+  {
+    "id": "sql-from-question",
+    "name": "SQL from a Question",
+    "description": "Translate a plain-English question into a SQL query with an explanation.",
+    "category": "Data",
+    "difficulty": "medium",
+    "tags": ["sql", "data", "database", "query"],
+    "steps": [
+      { "title": "Assumptions", "system": "You are a data analyst.", "prompt": "For this question, state the tables/columns you'll assume exist:\n\n{{topic}}" },
+      { "title": "Query", "system": "You write correct, readable SQL. Output only SQL.", "prompt": "Write a SQL query answering the question, using these assumptions:\n\n{{assumptions}}" },
+      { "title": "Explanation", "system": "You explain SQL clearly.", "prompt": "Explain what this query does clause by clause, and one way it could go wrong:\n\n{{query}}" }
+    ]
+  },
+  {
+    "id": "threat-model",
+    "name": "Threat Model",
+    "description": "Lightweight STRIDE-style threat model for a feature or system.",
+    "category": "Security",
+    "difficulty": "hard",
+    "tags": ["security", "threat-model", "stride", "risk"],
+    "steps": [
+      { "title": "Assets & entry points", "system": "You are a security engineer.", "prompt": "For \"{{topic}}\", list the key assets to protect and the entry points / trust boundaries." },
+      { "title": "Threats", "system": "You think like an attacker, using STRIDE.", "prompt": "Given these assets and entry points:\n\n{{assets-entry-points}}\n\nList plausible threats (spoofing, tampering, repudiation, info disclosure, DoS, elevation)." },
+      { "title": "Mitigations", "system": "You are a pragmatic defender.", "prompt": "For the highest-risk threats:\n\n{{threats}}\n\nRecommend concrete mitigations, prioritized." }
+    ]
+  },
+  {
+    "id": "security-checklist",
+    "name": "Security Review Checklist",
+    "description": "Generate a focused security checklist for a change or component.",
+    "category": "Security",
+    "difficulty": "medium",
+    "tags": ["security", "checklist", "review"],
+    "steps": [
+      { "title": "Surface", "system": "You are a security reviewer.", "prompt": "For \"{{topic}}\", describe the attack surface: inputs, auth, data handled, and external calls." },
+      { "title": "Checklist", "system": "You write actionable checklists.", "prompt": "Based on this surface:\n\n{{surface}}\n\nWrite a security review checklist grouped by category (input validation, authn/authz, secrets, dependencies, logging)." }
+    ]
+  },
+  {
+    "id": "blog-post",
+    "name": "Blog Post",
+    "description": "Find an angle, outline it, then draft an engaging blog post.",
+    "category": "Content",
+    "difficulty": "easy",
+    "tags": ["writing", "blog", "content", "marketing"],
+    "steps": [
+      { "title": "Angle", "system": "You are a sharp editor.", "prompt": "Suggest one strong angle and a working title for a blog post about \"{{topic}}\". Output just the angle and the title." },
+      { "title": "Outline", "system": "You are a content strategist.", "prompt": "Write a 5-section outline for a blog post about \"{{topic}}\" using this angle:\n\n{{angle}}\n\nOutput a numbered list." },
+      { "title": "Draft", "system": "You are a skilled writer. Use markdown headings.", "prompt": "Write the blog post about \"{{topic}}\" following this outline:\n\n{{outline}}\n\nMake it engaging and concrete." }
+    ]
+  },
+  {
+    "id": "landing-copy",
+    "name": "Landing Page Copy",
+    "description": "Craft a headline, subhead, benefits, and a call to action.",
+    "category": "Content",
+    "difficulty": "medium",
+    "tags": ["copywriting", "marketing", "landing", "conversion"],
+    "steps": [
+      { "title": "Value prop", "system": "You are a conversion copywriter.", "prompt": "In one sentence, state the core value proposition of \"{{topic}}\" for its target user." },
+      { "title": "Hero", "system": "You write punchy hero copy.", "prompt": "Based on this value prop:\n\n{{value-prop}}\n\nWrite a headline (under 10 words) and a one-sentence subhead." },
+      { "title": "Benefits & CTA", "system": "You write benefit-led copy.", "prompt": "Write 3 benefit bullets (outcome, not feature) and one call-to-action button label for \"{{topic}}\"." }
+    ]
+  },
+  {
+    "id": "seo-brief",
+    "name": "SEO Content Brief",
+    "description": "Build a brief: intent, keywords, outline, and title options.",
+    "category": "Content",
+    "difficulty": "medium",
+    "tags": ["seo", "content", "marketing", "keywords"],
+    "steps": [
+      { "title": "Intent", "system": "You are an SEO strategist.", "prompt": "For the keyword \"{{topic}}\", describe the likely search intent and who is searching." },
+      { "title": "Keywords", "system": "You cluster related terms.", "prompt": "List 8-12 related keywords and subtopics to cover for \"{{topic}}\", based on this intent:\n\n{{intent}}" },
+      { "title": "Outline & titles", "system": "You write scannable outlines.", "prompt": "Write an H2/H3 outline covering these keywords:\n\n{{keywords}}\n\nThen give 3 title options." }
+    ]
+  },
+  {
+    "id": "meeting-summary",
+    "name": "Meeting Summary",
+    "description": "Turn raw notes into a summary, decisions, and action items.",
+    "category": "Business",
+    "difficulty": "easy",
+    "tags": ["meeting", "summary", "productivity", "notes"],
+    "steps": [
+      { "title": "Summary", "system": "You summarize crisply and neutrally.", "prompt": "Summarize these meeting notes in 4-6 bullet points:\n\n{{topic}}" },
+      { "title": "Decisions", "system": "You extract decisions precisely.", "prompt": "List the decisions made, based on:\n\n{{summary}}\n\nIf none are explicit, say so." },
+      { "title": "Action items", "system": "You extract clear next steps.", "prompt": "List the action items with an owner (if named) and any due date, from the notes." }
+    ]
+  },
+  {
+    "id": "cold-email",
+    "name": "Cold Outreach Email",
+    "description": "Research the angle, draft the email, then a short follow-up.",
+    "category": "Business",
+    "difficulty": "medium",
+    "tags": ["email", "sales", "outreach", "writing"],
+    "steps": [
+      { "title": "Angle", "system": "You are a thoughtful sales writer who avoids spam.", "prompt": "For reaching out about \"{{topic}}\", suggest one relevant, specific angle that would earn a reply." },
+      { "title": "Email", "system": "You write short, human cold emails (under 120 words).", "prompt": "Write a cold email using this angle:\n\n{{angle}}\n\nClear subject line, one ask, no fluff." },
+      { "title": "Follow-up", "system": "You write polite, brief follow-ups.", "prompt": "Write a 3-sentence follow-up email for the above, to send if there's no reply." }
+    ]
+  },
+  {
+    "id": "swot",
+    "name": "SWOT Analysis",
+    "description": "Strengths, weaknesses, opportunities, threats — then a recommendation.",
+    "category": "Business",
+    "difficulty": "easy",
+    "tags": ["strategy", "swot", "business", "analysis"],
+    "steps": [
+      { "title": "SWOT", "system": "You are a strategy analyst.", "prompt": "Do a SWOT analysis for \"{{topic}}\". Give 3-4 concrete points under each of Strengths, Weaknesses, Opportunities, Threats." },
+      { "title": "Recommendation", "system": "You turn analysis into a decision.", "prompt": "Based on this SWOT:\n\n{{swot}}\n\nGive one clear strategic recommendation and the reasoning." }
+    ]
+  },
+  {
+    "id": "story-outline",
+    "name": "Story Outline",
+    "description": "Premise, characters, and a three-act outline for a story.",
+    "category": "Creative",
+    "difficulty": "easy",
+    "tags": ["fiction", "writing", "story", "creative"],
+    "steps": [
+      { "title": "Premise", "system": "You are a story editor.", "prompt": "Write a one-paragraph premise for a story about \"{{topic}}\", with a clear central conflict." },
+      { "title": "Characters", "system": "You create vivid, motivated characters.", "prompt": "Based on this premise:\n\n{{premise}}\n\nSketch the protagonist and one antagonist: goal, flaw, and what's at stake." },
+      { "title": "Three acts", "system": "You structure satisfying plots.", "prompt": "Outline the story in three acts (setup, confrontation, resolution) using the premise and characters. A few beats per act." }
+    ]
+  }
+]
