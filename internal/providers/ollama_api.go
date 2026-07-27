@@ -59,6 +59,43 @@ func newOllamaAPI(host, model string, temp float64) *OllamaAPI {
 
 func (o *OllamaAPI) ID() string { return "ollama-api" }
 
+// OllamaModels returns the model names installed on the local Ollama server, or
+// nil if the server is unreachable. It lets the UI offer a concrete choice of
+// local model instead of only autodetecting the first one.
+func OllamaModels() []string {
+	host := os.Getenv("REXO_OLLAMA_HOST")
+	if strings.TrimSpace(host) == "" {
+		host = defaultOllamaHost
+	}
+	host = strings.TrimRight(host, "/")
+
+	ctx, cancel := context.WithTimeout(context.Background(), time.Second)
+	defer cancel()
+	req, err := http.NewRequestWithContext(ctx, http.MethodGet, host+"/api/tags", nil)
+	if err != nil {
+		return nil
+	}
+	resp, err := http.DefaultClient.Do(req)
+	if err != nil {
+		return nil
+	}
+	defer resp.Body.Close()
+
+	var payload struct {
+		Models []struct {
+			Name string `json:"name"`
+		} `json:"models"`
+	}
+	if err := json.NewDecoder(resp.Body).Decode(&payload); err != nil {
+		return nil
+	}
+	names := make([]string, 0, len(payload.Models))
+	for _, m := range payload.Models {
+		names = append(names, m.Name)
+	}
+	return names
+}
+
 // CacheVariant folds in both the model and the temperature, since either can
 // change the output; without this the cache would serve a stale generation
 // after a temperature or model change.

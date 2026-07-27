@@ -34,25 +34,26 @@
     background: var(--panel); border: 1px solid var(--border);
     border-radius: 14px; padding: 20px;
   }
-  label { display: block; font-size: 13px; color: var(--muted); margin-bottom: 6px; }
+  label { display: block; font-size: 12px; color: var(--muted); margin-bottom: 6px; }
   input, select, textarea, button { font: inherit; }
-  .row { display: flex; gap: 12px; flex-wrap: wrap; }
   input[type=text] {
-    flex: 1 1 320px; min-width: 0; background: var(--panel-2); color: var(--text);
+    width: 100%; background: var(--panel-2); color: var(--text);
     border: 1px solid var(--border); border-radius: 10px; padding: 12px 14px;
   }
-  select {
-    background: var(--panel-2); color: var(--text);
-    border: 1px solid var(--border); border-radius: 10px; padding: 12px;
+  .controls { display: flex; gap: 12px; flex-wrap: wrap; align-items: flex-end; margin-top: 14px; }
+  .controls .field { flex: 1 1 150px; min-width: 130px; }
+  .controls select {
+    width: 100%; background: var(--panel-2); color: var(--text);
+    border: 1px solid var(--border); border-radius: 10px; padding: 11px 12px;
   }
   input:focus, select:focus { outline: 2px solid var(--accent); outline-offset: 0; }
   button.go {
     background: linear-gradient(135deg, var(--accent), var(--accent-2));
-    color: white; border: 0; border-radius: 10px; padding: 12px 20px;
-    font-weight: 600; cursor: pointer;
+    color: white; border: 0; border-radius: 10px; padding: 12px 22px;
+    font-weight: 600; cursor: pointer; height: 44px; flex: 0 0 auto;
   }
   button.go:disabled { opacity: 0.5; cursor: default; }
-  .hint { color: var(--muted); font-size: 13px; margin-top: 12px; }
+  .hint { color: var(--muted); font-size: 13px; margin-top: 14px; }
   .steps { margin-top: 24px; display: grid; gap: 14px; }
   .step {
     background: var(--panel); border: 1px solid var(--border);
@@ -68,8 +69,7 @@
   }
   .badge.cache { color: var(--ok); border-color: rgba(56,211,159,.4); }
   .step pre {
-    margin: 0; white-space: pre-wrap; word-wrap: break-word;
-    font: inherit; color: var(--text);
+    margin: 0; white-space: pre-wrap; word-wrap: break-word; font: inherit; color: var(--text);
   }
   .pending { display: flex; align-items: center; gap: 10px; color: var(--muted); }
   .spinner {
@@ -85,35 +85,48 @@
   .done code { color: var(--ok); }
   .error {
     margin-top: 20px; padding: 14px 16px; border-radius: 12px;
-    background: rgba(255,107,107,.08); border: 1px solid rgba(255,107,107,.3);
-    color: var(--err);
+    background: rgba(255,107,107,.08); border: 1px solid rgba(255,107,107,.3); color: var(--err);
   }
+  [hidden] { display: none !important; }
 </style>
 </head>
 <body>
 <div class="wrap">
   <header>
     <h1><span class="brand">REXO</span> Studio</h1>
-    <div class="sub">Describe a goal. Watch your AI pipeline build it, step by step.</div>
+    <div class="sub">Describe a goal. Choose your AI. Watch it build, step by step.</div>
   </header>
 
   <div class="status" id="status"><span class="pill"><span class="dot"></span> checking providers…</span></div>
 
   <div class="card">
     <label for="topic">What do you want to create?</label>
-    <div class="row">
-      <input id="topic" type="text" placeholder="e.g. REST APIs, Photosynthesis, The French Revolution" />
-      <select id="lang" title="Output language">
-        <option value="en">English</option>
-        <option value="pt">Português</option>
-        <option value="es">Español</option>
-        <option value="fr">Français</option>
-      </select>
+    <input id="topic" type="text" placeholder="e.g. React, Photosynthesis, The French Revolution" />
+
+    <div class="controls">
+      <div class="field">
+        <label for="provider">AI provider</label>
+        <select id="provider"></select>
+      </div>
+      <div class="field" id="modelField" hidden>
+        <label for="model">Model</label>
+        <select id="model"></select>
+      </div>
+      <div class="field">
+        <label for="lang">Language</label>
+        <select id="lang">
+          <option value="en">English</option>
+          <option value="pt">Português</option>
+          <option value="es">Español</option>
+          <option value="fr">Français</option>
+        </select>
+      </div>
       <button class="go" id="go">Generate</button>
     </div>
-    <div class="hint">This runs the <b>text.generate</b> capability as a 4-step mini-lesson
-      (summary → objectives → slide outline → quiz). Re-running the same topic is served
-      from cache — free and instant.</div>
+
+    <div class="hint">Runs the <b>text.generate</b> capability as a 4-step mini-lesson
+      (summary → objectives → slide outline → quiz). Re-running the same topic on the
+      same model is served from cache — free and instant.</div>
   </div>
 
   <div class="steps" id="steps"></div>
@@ -122,31 +135,46 @@
 
 <script>
 (function () {
-  var statusEl = document.getElementById('status');
-  var stepsEl = document.getElementById('steps');
-  var tailEl = document.getElementById('tail');
-  var goBtn = document.getElementById('go');
-  var topicEl = document.getElementById('topic');
-  var langEl = document.getElementById('lang');
+  var $ = function (id) { return document.getElementById(id); };
+  var statusEl = $('status'), stepsEl = $('steps'), tailEl = $('tail');
+  var goBtn = $('go'), topicEl = $('topic'), langEl = $('lang');
+  var providerEl = $('provider'), modelEl = $('model'), modelField = $('modelField');
+  var ollamaModels = [];
   var es = null;
+
+  function esc(s) { var d = document.createElement('div'); d.textContent = String(s == null ? '' : s); return d.innerHTML; }
+
+  function fill(sel, values, autoLabel) {
+    sel.innerHTML = '';
+    if (autoLabel) { var a = document.createElement('option'); a.value = ''; a.textContent = autoLabel; sel.appendChild(a); }
+    values.forEach(function (v) { var o = document.createElement('option'); o.value = v; o.textContent = v; sel.appendChild(o); });
+  }
+
+  function isOllama(p) { return p === 'ollama' || p === 'ollama-api'; }
+  function syncModelField() {
+    modelField.hidden = !(isOllama(providerEl.value) && ollamaModels.length > 0);
+  }
 
   fetch('/api/status').then(function (r) { return r.json(); }).then(function (s) {
     var provs = (s && s.providers) || [];
+    ollamaModels = (s && s.ollamaModels) || [];
+
     if (provs.length === 0) {
       statusEl.innerHTML = '<span class="pill"><span class="dot warn"></span> No AI provider found — install Claude Code, Codex, or Ollama, then reload</span>';
       goBtn.disabled = true;
-    } else {
-      statusEl.innerHTML = '<span class="pill"><span class="dot ok"></span> AI ready</span>' +
-        provs.map(function (p) { return '<span class="pill">' + esc(p) + '</span>'; }).join('');
+      return;
     }
+    statusEl.innerHTML = '<span class="pill"><span class="dot ok"></span> AI ready</span>' +
+      provs.map(function (p) { return '<span class="pill">' + esc(p) + '</span>'; }).join('');
+
+    fill(providerEl, provs, 'Auto (best available)');
+    fill(modelEl, ollamaModels, '');
+    syncModelField();
   }).catch(function () {
     statusEl.innerHTML = '<span class="pill"><span class="dot warn"></span> could not reach REXO</span>';
   });
 
-  function esc(s) {
-    var d = document.createElement('div'); d.textContent = String(s == null ? '' : s);
-    return d.innerHTML;
-  }
+  providerEl.addEventListener('change', syncModelField);
 
   function pending(text) {
     var el = document.createElement('div');
@@ -159,14 +187,14 @@
     var topic = topicEl.value.trim();
     if (!topic) { topicEl.focus(); return; }
     if (es) es.close();
-    stepsEl.innerHTML = '';
-    tailEl.innerHTML = '';
-    goBtn.disabled = true;
+    stepsEl.innerHTML = ''; tailEl.innerHTML = ''; goBtn.disabled = true;
 
     var waiting = pending('Thinking… the AI pipeline is starting');
     stepsEl.appendChild(waiting);
 
     var url = '/api/demo?topic=' + encodeURIComponent(topic) + '&lang=' + encodeURIComponent(langEl.value);
+    if (providerEl.value) url += '&provider=' + encodeURIComponent(providerEl.value);
+    if (!modelField.hidden && modelEl.value) url += '&model=' + encodeURIComponent(modelEl.value);
     es = new EventSource(url);
 
     es.addEventListener('step', function (ev) {

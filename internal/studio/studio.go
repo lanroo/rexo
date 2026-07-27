@@ -50,6 +50,7 @@ func Serve(opt Options, stdout io.Writer) error {
 		res := providers.DefaultResolver(opt.ProjectDir, opt.Provider)
 		writeJSON(w, map[string]any{
 			"providers":    res.Available(),
+			"ollamaModels": providers.OllamaModels(),
 			"capabilities": []string{"text.generate"},
 		})
 	})
@@ -57,6 +58,14 @@ func Serve(opt Options, stdout io.Writer) error {
 	mux.HandleFunc("/api/demo", func(w http.ResponseWriter, r *http.Request) {
 		topic := r.URL.Query().Get("topic")
 		lang := r.URL.Query().Get("lang")
+		provider := r.URL.Query().Get("provider")
+		if provider == "" {
+			provider = opt.Provider
+		}
+		model := r.URL.Query().Get("model")
+		if model == "" {
+			model = opt.Model
+		}
 
 		flusher, ok := w.(http.Flusher)
 		if !ok {
@@ -75,8 +84,8 @@ func Serve(opt Options, stdout io.Writer) error {
 		result, err := demo.Run(r.Context(), demo.Options{
 			Topic:      topic,
 			ProjectDir: opt.ProjectDir,
-			Provider:   opt.Provider,
-			Model:      opt.Model,
+			Provider:   provider,
+			Model:      model,
 			Lang:       lang,
 			Progress:   func(s demo.StepResult) { send("step", s) },
 		})
