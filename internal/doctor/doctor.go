@@ -6,6 +6,9 @@ import (
 	"os"
 	"os/exec"
 	"runtime"
+	"strings"
+
+	"github.com/lanroo/rexo/internal/providers"
 )
 
 type Check struct {
@@ -31,6 +34,7 @@ func Run() Report {
 		platformCheck(),
 		executableCheck("git"),
 		configDirectoryCheck(),
+		aiProvidersCheck(),
 	)
 	for _, check := range report.Checks {
 		if !check.OK {
@@ -80,4 +84,19 @@ func configDirectoryCheck() Check {
 		return Check{Name: "config directory", OK: false, Details: err.Error()}
 	}
 	return Check{Name: "config directory", OK: true, Details: path}
+}
+
+// aiProvidersCheck reports which text.generate provider CLIs are on PATH. It is
+// advisory, not health-gating: the deterministic core runs without any AI
+// provider, but `rexo demo` needs at least one.
+func aiProvidersCheck() Check {
+	available := providers.DefaultResolver("", "").Available()
+	if len(available) == 0 {
+		return Check{
+			Name:    "ai-providers",
+			OK:      true,
+			Details: "none found — install claude (Claude Code), codex, or ollama to use `rexo demo`",
+		}
+	}
+	return Check{Name: "ai-providers", OK: true, Details: strings.Join(available, ", ")}
 }

@@ -1,6 +1,7 @@
 package cli
 
 import (
+	"context"
 	"encoding/json"
 	"errors"
 	"flag"
@@ -9,6 +10,7 @@ import (
 	"path/filepath"
 	"runtime"
 
+	"github.com/lanroo/rexo/internal/demo"
 	"github.com/lanroo/rexo/internal/doctor"
 	"github.com/lanroo/rexo/internal/kernel"
 	"github.com/lanroo/rexo/internal/project"
@@ -39,6 +41,8 @@ func Run(args []string, stdout, stderr io.Writer, build BuildInfo) int {
 		return runInit(args[1:], stdout, stderr)
 	case "run":
 		return runRun(args[1:], stdout, stderr)
+	case "demo":
+		return runDemo(args[1:], stdout, stderr)
 	default:
 		fmt.Fprintf(stderr, "unknown command %q\n\n", args[0])
 		printHelp(stderr)
@@ -176,6 +180,77 @@ func runRun(args []string, stdout, stderr io.Writer) int {
 	return 0
 }
 
+func runDemo(args []string, stdout, stderr io.Writer) int {
+	flags := flag.NewFlagSet("demo", flag.ContinueOnError)
+	flags.SetOutput(stderr)
+	projectDir := flags.String("project", ".", "project directory that holds .rexo")
+	provider := flags.String("provider", "", "preferred provider: claude-code, codex, or ollama")
+	model := flags.String("model", "", "ollama model to use (default: autodetect the first installed)")
+	lang := flags.String("lang", "en", "output language for the whole lesson, e.g. en, pt, es, fr")
+
+	// Go's flag package stops parsing at the first positional argument, so
+	// `demo "topic" --provider x` would drop the flags. Pull the topic out and
+	// parse any flags that trail it, so both orderings work.
+	if err := flags.Parse(args); err != nil {
+		return 2
+	}
+	rest := flags.Args()
+	if len(rest) == 0 {
+		fmt.Fprintln(stderr, "usage: rexo demo <topic> [--provider <id>] [--model <name>] [--lang <code>] [--project <dir>]")
+		fmt.Fprintln(stderr, "example: rexo demo \"REST APIs\"")
+		return 2
+	}
+	topic := rest[0]
+	if len(rest) > 1 {
+		if err := flags.Parse(rest[1:]); err != nil {
+			return 2
+		}
+		if flags.NArg() != 0 {
+			fmt.Fprintf(stderr, "unexpected extra arguments: %v\n", flags.Args())
+			return 2
+		}
+	}
+	fmt.Fprintf(stdout, "Generating a mini-lesson on %q ...\n\n", topic)
+
+	res, err := demo.Run(context.Background(), demo.Options{
+		Topic:      topic,
+		ProjectDir: *projectDir,
+		Provider:   *provider,
+		Model:      *model,
+		Lang:       *lang,
+	})
+	if err != nil {
+		fmt.Fprintf(stderr, "demo failed: %v\n", err)
+		return 1
+	}
+
+	// Per-step provenance makes the Economy Engine visible: a cached step did
+	// not call the model at all.
+	calls := 0
+	for _, s := range res.Steps {
+		who := s.Provider
+		if s.Model != "" {
+			who = s.Provider + ":" + s.Model
+		}
+		status := fmt.Sprintf("generated via %s in %dms", who, s.DurationMS)
+		if s.CacheHit {
+			status = fmt.Sprintf("reused from cache (%s) — 0 model calls", who)
+		} else {
+			calls++
+		}
+		fmt.Fprintf(stdout, "  [%s] %s\n", s.Title, status)
+	}
+
+	fmt.Fprintf(stdout, "\nMini-lesson written to: %s\n", res.OutputPath)
+	if res.FullyCached {
+		fmt.Fprintln(stdout, "Every step was served from cache — this run cost 0 model calls.")
+	} else {
+		fmt.Fprintf(stdout, "%d of %d step(s) called a model; the rest were cached.\n", calls, len(res.Steps))
+		fmt.Fprintln(stdout, "Run the same command again — it will be instant and free (Economy Engine).")
+	}
+	return 0
+}
+
 func printWelcome(w io.Writer, build BuildInfo) {
 	version := build.Version
 	if version == "" {
@@ -192,18 +267,20 @@ and safe, not a virus. You use REXO by typing a command below.
 
 Try one of these:
 
+  rexo demo "REST APIs"    Generate an AI mini-lesson (needs an AI CLI)
   rexo doctor              Check that your machine is ready
   rexo init my-project     Create a new REXO project
-  rexo run workflow.json   Execute a workflow
+  rexo run workflow.json   Execute a deterministic workflow
   rexo version             Show version details
   rexo help                Show the full command list
 
-On Windows, type it as:  .\rexo.exe doctor
+On Windows, type it as:  .\rexo.exe demo "REST APIs"
 
 Docs & downloads: https://github.com/lanroo/rexo
 
-Note: this %s public foundation does not call an AI model yet.
-`, version, version)
+Tip: "rexo demo" uses your Claude Code, Codex, or Ollama CLI. Run the same
+topic twice — the second run is instant and free (the Economy Engine caches it).
+`, version)
 }
 
 func printHelp(w io.Writer) {
@@ -214,10 +291,12 @@ Usage:
 
 Commands:
   version   Show version and platform information
-  doctor    Validate this machine for REXO
+  doctor    Validate this machine for REXO (lists available AI providers)
   init      Create a new REXO project
-  run       Execute a workflow (deterministic; --replay verifies it)
+  run       Execute a deterministic workflow (--replay verifies determinism)
+  demo      Generate an AI mini-lesson on a topic (needs Claude Code, Codex, or Ollama)
   help      Show this help
 
-This is a foundation release. Workflows are deterministic and do not call an LLM.`)
+"rexo run" is deterministic and replayable. "rexo demo" calls a language model
+through your installed CLI and caches results so repeats are free.`)
 }

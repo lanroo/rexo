@@ -1,6 +1,9 @@
 tmp/
 dist/
 output/
+# REXO run state: runs, content-addressed artifacts, and the generation cache.
+# Created by `rexo run`/`rexo demo` in any project dir; never committed.
+.rexo/
 .env
 .env.*
 !.env.example
