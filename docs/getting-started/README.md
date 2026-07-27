@@ -208,7 +208,14 @@ rexo demo "REST APIs"
 ```
 
 REXO picks an available provider, runs the four steps, and writes a Markdown
-lesson to `.rexo/demo/rest-apis.md`. To force a specific provider:
+lesson to `.rexo/demo/rest-apis.md`. The whole lesson is written in one
+language (English by default); pick another with `--lang`:
+
+```bash
+rexo demo "REST APIs" --lang pt
+```
+
+To force a specific provider:
 
 ```bash
 rexo demo "REST APIs" --provider ollama

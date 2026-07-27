@@ -186,6 +186,7 @@ func runDemo(args []string, stdout, stderr io.Writer) int {
 	projectDir := flags.String("project", ".", "project directory that holds .rexo")
 	provider := flags.String("provider", "", "preferred provider: claude-code, codex, or ollama")
 	model := flags.String("model", "", "ollama model to use (default: autodetect the first installed)")
+	lang := flags.String("lang", "en", "output language for the whole lesson, e.g. en, pt, es, fr")
 
 	// Go's flag package stops parsing at the first positional argument, so
 	// `demo "topic" --provider x` would drop the flags. Pull the topic out and
@@ -195,7 +196,7 @@ func runDemo(args []string, stdout, stderr io.Writer) int {
 	}
 	rest := flags.Args()
 	if len(rest) == 0 {
-		fmt.Fprintln(stderr, "usage: rexo demo <topic> [--provider <id>] [--model <name>] [--project <dir>]")
+		fmt.Fprintln(stderr, "usage: rexo demo <topic> [--provider <id>] [--model <name>] [--lang <code>] [--project <dir>]")
 		fmt.Fprintln(stderr, "example: rexo demo \"REST APIs\"")
 		return 2
 	}
@@ -216,6 +217,7 @@ func runDemo(args []string, stdout, stderr io.Writer) int {
 		ProjectDir: *projectDir,
 		Provider:   *provider,
 		Model:      *model,
+		Lang:       *lang,
 	})
 	if err != nil {
 		fmt.Fprintf(stderr, "demo failed: %v\n", err)

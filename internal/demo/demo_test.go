@@ -20,6 +20,23 @@ func TestSlug(t *testing.T) {
 	}
 }
 
+func TestLanguageName(t *testing.T) {
+	cases := map[string]string{
+		"":       "English", // default
+		"en":     "English",
+		"pt":     "Portuguese",
+		"PT":     "Portuguese",
+		"es":     "Spanish",
+		"fr":     "French",
+		"German": "German", // pass-through for unknown codes
+	}
+	for in, want := range cases {
+		if got := languageName(in); got != want {
+			t.Errorf("languageName(%q) = %q, want %q", in, got, want)
+		}
+	}
+}
+
 func TestRunRejectsEmptyTopic(t *testing.T) {
 	_, err := Run(context.Background(), Options{Topic: "   ", ProjectDir: t.TempDir()})
 	if err == nil {
