@@ -1,8 +1,10 @@
 # Getting started
 
 REXO ships as a single self-contained executable. It needs **no** Python, Node,
-Docker, or LLM account to run. The first release is intentionally small and does
-not call any AI model yet.
+Docker, or LLM account to run. Deterministic workflows (`rexo run`) need no AI
+account at all. The optional `rexo demo` command adds AI orchestration by
+driving an AI CLI you install separately — see
+[Try AI orchestration](#try-ai-orchestration-rexo-demo).
 
 There are two tracks below. Pick the one that matches you:
 
@@ -162,10 +164,83 @@ Running `rexo init <name>` scaffolds a portable project:
 | Command | What it does |
 |---|---|
 | `rexo version` | Prints the version and your OS/CPU target. |
-| `rexo doctor` | Verifies basic machine compatibility. |
+| `rexo doctor` | Verifies machine compatibility and lists available AI providers. |
 | `rexo init <dir>` | Creates a new portable REXO project in `<dir>`. |
-| `rexo run <workflow.json>` | Executes a workflow; `--replay <run-id>` verifies determinism. |
+| `rexo run <workflow.json>` | Executes a deterministic workflow; `--replay <run-id>` verifies determinism. |
+| `rexo demo "<topic>"` | Generates an AI mini-lesson on a topic through your installed AI CLI. |
 
-Workflows are currently **deterministic** — no LLM or provider selection yet.
-That comes in later phases; see the [roadmap](../roadmap/core-v1.md) and the
-[Phase 1 design](../roadmap/phase-1-walking-skeleton.md).
+`rexo run` is **deterministic** and replayable. `rexo demo` is the first
+**probabilistic** capability — it calls a language model. The two are kept
+separate on purpose; see the [roadmap](../roadmap/core-v1.md).
+
+---
+
+## Try AI orchestration: `rexo demo`
+
+This is where REXO stops being a deterministic toy and starts orchestrating
+real AI. `rexo demo` runs a four-step pipeline — summary → learning objectives
+→ slide outline → quiz question — where each step feeds the next. That chaining
+is the orchestration; it is not a single chat call.
+
+### 1. Install one AI CLI
+
+REXO does not ship or manage any API key. It drives a command-line tool you
+already trust. Install **any one** of these:
+
+| Provider | Install | Cost |
+|---|---|---|
+| **Claude Code** (`claude`) | [claude.com/claude-code](https://claude.com/claude-code) | Anthropic account |
+| **Codex** (`codex`) | OpenAI Codex CLI | OpenAI account |
+| **Ollama** (`ollama`) | [ollama.com](https://ollama.com) + `ollama pull <model>` | Free, offline |
+
+Then confirm REXO can see it:
+
+```bash
+rexo doctor
+```
+
+The `ai-providers` line lists whichever CLIs are on your PATH.
+
+### 2. Generate a mini-lesson
+
+```bash
+rexo demo "REST APIs"
+```
+
+REXO picks an available provider, runs the four steps, and writes a Markdown
+lesson to `.rexo/demo/rest-apis.md`. To force a specific provider:
+
+```bash
+rexo demo "REST APIs" --provider ollama
+```
+
+With Ollama, REXO auto-detects the first model from `ollama list`. Output
+quality tracks the model: a small model rambles, a larger one reads like a real
+lesson. Pick one explicitly with `--model`:
+
+```bash
+rexo demo "REST APIs" --provider ollama --model gpt-oss:20b
+```
+
+REXO reaches Ollama two ways: `ollama-api` (the HTTP server, preferred — it
+allows a low temperature for focused output) and `ollama` (the CLI, a fallback
+when only the binary is running). When the server is up, the API path is chosen
+automatically. Tune it with environment variables:
+
+| Variable | Effect | Default |
+|---|---|---|
+| `REXO_OLLAMA_MODEL` | Model to use (same as `--model`) | autodetect |
+| `REXO_OLLAMA_TEMPERATURE` | Lower = more focused, less rambling | `0.3` |
+| `REXO_OLLAMA_HOST` | Ollama server URL | `http://localhost:11434` |
+
+### 3. See the Economy Engine work
+
+Run the **exact same command again**:
+
+```bash
+rexo demo "REST APIs"
+```
+
+Every step now reports *reused from cache — 0 model calls*, and the result is
+instant. REXO content-addresses each generation, so an identical request never
+pays twice. That is the Economy Engine: reuse before generating.
